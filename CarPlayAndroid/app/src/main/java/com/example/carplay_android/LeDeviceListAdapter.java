@@ -9,10 +9,13 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class LeDeviceListAdapter extends BaseAdapter {
     private ArrayList<BluetoothDevice> mLeDevices;
     private LayoutInflater mInflator;
+    private final ExecutorService e1 = Executors.newSingleThreadScheduledExecutor();
     static class ViewHolder {
         TextView deviceName;
         TextView deviceAddress;
@@ -21,7 +24,6 @@ public class LeDeviceListAdapter extends BaseAdapter {
     public LeDeviceListAdapter() {
         super();
         mLeDevices = new ArrayList<BluetoothDevice>();
-        mInfl  ator = MainActivity.this.getLayoutInflater();
     }
 
     public void addDevice(BluetoothDevice device) {
@@ -58,10 +60,10 @@ public class LeDeviceListAdapter extends BaseAdapter {
         ViewHolder viewHolder;
         // General ListView optimization code.
         if (view == null) {
-            view = mInflator.inflate(R.layout.listitem_device, null);
+            view = mInflator.inflate(R.layout.device_information, null);
             viewHolder = new ViewHolder();
-            viewHolder.deviceAddress = (TextView) view.findViewById(R.id.device_address);
-            viewHolder.deviceName = (TextView) view.findViewById(R.id.device_name);
+            //viewHolder.deviceAddress = (TextView) view.findViewById(R.id.textViewAddress);
+            //viewHolder.deviceName = (TextView) view.findViewById(R.id.textViewName);
             view.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolder) view.getTag();
@@ -72,7 +74,7 @@ public class LeDeviceListAdapter extends BaseAdapter {
         if (deviceName != null && deviceName.length() > 0)
             viewHolder.deviceName.setText(deviceName);
         else
-            viewHolder.deviceName.setText(R.string.unknown_device);
+            viewHolder.deviceName.setText("unknown_device");
         viewHolder.deviceAddress.setText(device.getAddress());
 
         return view;
