@@ -2,6 +2,7 @@ package com.example.carplay_android;
 
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothDevice;
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,12 +19,17 @@ import java.util.concurrent.Executors;
 public class LeDeviceListAdapter extends BaseAdapter {
     private List<BleDevice> bleDeviceLeDevices;
     private LayoutInflater layoutInflater;
+    private Context mContext;
 
     private final ExecutorService e1 = Executors.newSingleThreadScheduledExecutor();
 
     class ViewHolder {
         TextView deviceName;
         TextView deviceAddress;
+    }
+
+    public LeDeviceListAdapter(Context context){
+        mContext = context;
     }
 
     public void addDeviceList(List<BleDevice> devices) {
@@ -63,7 +69,7 @@ public class LeDeviceListAdapter extends BaseAdapter {
         ViewHolder viewHolder;
         // General ListView optimization code.
         if (view == null) {
-            view = layoutInflater.inflate(R.layout.device_information, viewGroup, false);
+            view = LayoutInflater.from(mContext).inflate(R.layout.device_information, viewGroup, false);
             viewHolder = new ViewHolder();
             viewHolder.deviceAddress = (TextView) view.findViewById(R.id.textViewAddress);
             viewHolder.deviceName = (TextView) view.findViewById(R.id.textViewName);

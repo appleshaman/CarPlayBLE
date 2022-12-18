@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Handler handler = new Handler();
     List<BleDevice> resultList;
-    private LeDeviceListAdapter leDeviceListAdapter = new LeDeviceListAdapter();
+    private LeDeviceListAdapter leDeviceListAdapter = new LeDeviceListAdapter(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
