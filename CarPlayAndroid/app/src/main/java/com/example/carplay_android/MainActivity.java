@@ -11,6 +11,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
@@ -27,13 +28,17 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.clj.fastble.BleManager;
+import com.clj.fastble.callback.BleGattCallback;
 import com.clj.fastble.callback.BleScanCallback;
 import com.clj.fastble.data.BleDevice;
+import com.clj.fastble.exception.BleException;
 import com.clj.fastble.scan.BleScanRuleConfig;
 
 import java.io.Serializable;
@@ -47,10 +52,14 @@ import java.util.ListIterator;
 public class MainActivity extends AppCompatActivity {
 
     private Button buttonScan;
+    private Button buttonConnect;
     private ListView bleList;
+    private TextView deviceName;
+    private TextView deviceAddress;
 
     private Handler handler = new Handler();
-    List<BleDevice> resultList;
+    private List<BleDevice> resultList;
+    private int selected = 0;
     private LeDeviceListAdapter leDeviceListAdapter = new LeDeviceListAdapter(this);
 
     @Override
@@ -67,14 +76,39 @@ public class MainActivity extends AppCompatActivity {
         requestPermissions(permissions, 200);
 
         buttonScan = findViewById(R.id.buttonScan);
+        buttonConnect = findViewById(R.id.buttonConnect);
         bleList = findViewById(R.id.deviceList);
+        deviceAddress = findViewById(R.id.deviceAddress);
+        deviceName = findViewById(R.id.deviceName);
+
+
         bleList.setAdapter(leDeviceListAdapter);
+        bleList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                TextView textView = view.findViewById(R.id.addressForSingle);
+                if(textView.getText() != deviceAddress.getText()){
+                    deviceAddress.setText(textView.getText());
+                    textView = view.findViewById(R.id.nameForSingle);
+                    deviceName.setText(textView.getText());
+                    selected = i;
+                }
+                connectLeDevice(selected);
+            }
+        });
 
 
         buttonScan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 scanLeDevice();
+            }
+        });
+
+        buttonConnect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                connectLeDevice(selected);
             }
         });
 
@@ -95,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
     private static final long SCAN_PERIOD = 5000;
-    public void scanLeDevice() {
+    private void scanLeDevice() {
         BleScanRuleConfig scanRuleConfig = new BleScanRuleConfig.Builder()
                 .setScanTimeOut(10000)
                 .build();
@@ -124,10 +158,33 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("s","Finished");
                 resultList = scanResultList;
                 leDeviceListAdapter.addDeviceList(scanResultList);
+                leDeviceListAdapter.notifyDataSetChanged();
             }
         });
     }
+    private void connectLeDevice(int position){
+        BleManager.getInstance().connect((BleDevice) leDeviceListAdapter.getItem(position), new BleGattCallback() {
+            @Override
+            public void onStartConnect() {
 
+            }
+
+            @Override
+            public void onConnectFail(BleDevice bleDevice, BleException exception) {
+
+            }
+
+            @Override
+            public void onConnectSuccess(BleDevice bleDevice, BluetoothGatt gatt, int status) {
+
+            }
+
+            @Override
+            public void onDisConnected(boolean isActiveDisConnected, BleDevice device, BluetoothGatt gatt, int status) {
+
+            }
+        });
+    }
 
 
 

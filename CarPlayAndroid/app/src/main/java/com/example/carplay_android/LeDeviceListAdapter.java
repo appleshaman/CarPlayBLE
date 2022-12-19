@@ -18,6 +18,7 @@ import java.util.concurrent.Executors;
 
 public class LeDeviceListAdapter extends BaseAdapter {
     private List<BleDevice> bleDeviceLeDevices;
+    //private List<String> bleDeviceLeDevices = new ArrayList<>();
     private LayoutInflater layoutInflater;
     private Context mContext;
 
@@ -36,10 +37,6 @@ public class LeDeviceListAdapter extends BaseAdapter {
             bleDeviceLeDevices = devices;
     }
 
-    public BleDevice getDevice(int position) {
-        return bleDeviceLeDevices.get(position);
-    }
-
     public void clear() {
         bleDeviceLeDevices.clear();
     }
@@ -55,8 +52,7 @@ public class LeDeviceListAdapter extends BaseAdapter {
 
     @Override
     public Object getItem(int i) {
-        //return bleDeviceLeDevices.get(i);
-        return null;
+        return bleDeviceLeDevices.get(i);
     }
 
     @Override
@@ -71,8 +67,8 @@ public class LeDeviceListAdapter extends BaseAdapter {
         if (view == null) {
             view = LayoutInflater.from(mContext).inflate(R.layout.device_information, viewGroup, false);
             viewHolder = new ViewHolder();
-            viewHolder.deviceAddress = (TextView) view.findViewById(R.id.textViewAddress);
-            viewHolder.deviceName = (TextView) view.findViewById(R.id.textViewName);
+            viewHolder.deviceAddress = (TextView) view.findViewById(R.id.addressForSingle);
+            viewHolder.deviceName = (TextView) view.findViewById(R.id.nameForSingle);
             view.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolder) view.getTag();

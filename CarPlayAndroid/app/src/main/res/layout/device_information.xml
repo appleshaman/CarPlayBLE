@@ -12,7 +12,9 @@
         <TextView
             android:id="@+id/nameForSingle"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="30dp"
+            android:layout_marginLeft="5dp"
+            android:gravity="center_vertical"
             android:text="TextView"
             android:textColor="@color/black"
             android:textSize="20sp" />
@@ -20,7 +22,9 @@
         <TextView
             android:id="@+id/addressForSingle"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="30dp"
+            android:layout_marginLeft="5dp"
+            android:gravity="center_vertical"
             android:text="TextView"
             android:textColor="@color/black"
             android:textSize="20sp" />
