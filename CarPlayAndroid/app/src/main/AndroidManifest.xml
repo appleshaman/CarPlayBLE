@@ -25,12 +25,14 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.CarPlayAndroid"
         tools:targetApi="31">
+        <activity
+            android:name=".BleScanPage"
+            android:exported="false" />
+
         <service
             android:name=".BleService"
             android:enabled="true"
-            android:exported="true"
-            >
-        </service>
+            android:exported="true"></service>
         <service
             android:name=".NotificationService"
             android:enabled="true"
