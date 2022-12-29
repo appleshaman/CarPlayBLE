@@ -1,5 +1,7 @@
 package com.example.carplay_android;
 
+import static com.example.carplay_android.ScanBleDeviceUtils.scanLeDevice;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
@@ -22,7 +24,7 @@ public class BleScanPage extends AppCompatActivity {
     private TextView deviceAddress;
 
     private List<BleDevice> resultList;
-    private int selected = 0;
+    private int selected = -1;
     private LeDeviceListAdapter leDeviceListAdapter = new LeDeviceListAdapter(this);
 
     @Override
@@ -49,7 +51,7 @@ public class BleScanPage extends AppCompatActivity {
         buttonScan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                scanLeDevice();
+                resultList = scanLeDevice(getApplicationContext());
             }
         });
 

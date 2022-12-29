@@ -7,11 +7,14 @@ import android.bluetooth.BluetoothGattService;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
 import androidx.annotation.Nullable;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 
 import com.clj.fastble.BleManager;
@@ -26,15 +29,17 @@ import com.clj.fastble.scan.BleScanRuleConfig;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 
 
 public class BleService extends Service {
 
 
-
+    private Timer timerBTState;
     private Handler handler = new Handler();
-    private List<BleDevice> resultList;
+
 
     @Nullable
     @Override
@@ -45,13 +50,33 @@ public class BleService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        BleManager.getInstance().init(getApplication());
-        if(BleManager.getInstance().isSupportBle()){
-            Log.d("s","support");
-            if(!BleManager.getInstance().isBlueEnable()){
-                Log.d("s","Not enable");
-                BleManager.getInstance().enableBluetooth();
-            }
+//        BleManager.getInstance().init(getApplication());
+//        if(BleManager.getInstance().isSupportBle()){
+//            Log.d("s","support");
+//            if(!BleManager.getInstance().isBlueEnable()){
+//                Log.d("s","Not enable");
+//                BleManager.getInstance().enableBluetooth();
+//            }
+//        }
+    }
+
+    public void setBTCheckTimer(){
+        if(timerBTState == null){
+            timerBTState = new Timer();
+            TimerTask  timerTask = new TimerTask() {
+                @Override
+                public void run() {
+                    BleManager.getInstance().init(getApplication());
+                    Bundle bundle = new Bundle();
+                    if(BleManager.getInstance().isSupportBle()){
+                        if(!BleManager.getInstance().isBlueEnable()){
+                            BleManager.getInstance().enableBluetooth();
+                        }
+                    }
+                    bundle.putBoolean("support", false);
+
+                }
+            };
         }
     }
 
@@ -60,39 +85,7 @@ public class BleService extends Service {
             return BleService.this;
         }
 
-        private List<BleDevice> scanLeDevice() {
-            BleScanRuleConfig scanRuleConfig = new BleScanRuleConfig.Builder()
-                    .setScanTimeOut(10000)
-                    .build();
-            BleManager.getInstance().initScanRule(scanRuleConfig);
-            BleManager.getInstance().scan(new BleScanCallback() {
-                @Override
-                public void onScanStarted(boolean success) {
-                    Context context = getApplicationContext();
-                    CharSequence text = "Scan start";
-                    int duration = Toast.LENGTH_SHORT;
 
-                    Toast toast = Toast.makeText(context, text, duration);
-                    toast.show();
-                }
-
-                @Override
-                public void onLeScan(BleDevice bleDevice) {
-                }
-
-                @Override
-                public void onScanning(BleDevice bleDevice) {
-                }
-
-                @Override
-                public void onScanFinished(List<BleDevice> scanResultList) {
-                    Log.d("s","Finished");
-                    resultList = scanResultList;
-                    leDeviceListAdapter.addDeviceList(scanResultList);
-                    leDeviceListAdapter.notifyDataSetChanged();
-
-                }
-            });
         }
         private void connectLeDevice(int position){
             BleManager.getInstance().connect((BleDevice) leDeviceListAdapter.getItem(position), new BleGattCallback() {
