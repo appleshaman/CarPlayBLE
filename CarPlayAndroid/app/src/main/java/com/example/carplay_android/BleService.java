@@ -42,6 +42,7 @@ public class BleService extends Service {
     private Handler handler = new Handler();
 
 
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -86,9 +87,7 @@ public class BleService extends Service {
         public BleService getService() {
             return BleService.this;
         }
-        public void connectLeDeviceInPosition(int position) {
-            connectLeDevice(ScanBleDeviceUtils.resultList.get(position));
-        }
+
         public void connectLeDevice(BleDevice bleDevice){
             BleManager.getInstance().connect((BleDevice) bleDevice, new BleGattCallback() {
                 @Override
@@ -169,8 +168,6 @@ public class BleService extends Service {
 
     }
 
-    //通过binder实现调用者client与Service之间的通信
-    private BleBinder binder = new BleBinder();
 
 
 }

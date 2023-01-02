@@ -14,7 +14,8 @@ import com.clj.fastble.scan.BleScanRuleConfig;
 import java.util.List;
 
 public class ScanBleDeviceUtils {
-    static List<BleDevice> resultList;
+    private static List<BleDevice> resultList;
+
     public static void scanLeDevice(Context context) {
         BleScanRuleConfig scanRuleConfig = new BleScanRuleConfig.Builder()
                 .setScanTimeOut(10000)
@@ -49,5 +50,11 @@ public class ScanBleDeviceUtils {
                 localBroadcastManager.sendBroadcast(intent);
             }
         });
+    }
+    public static void setResultList(List<BleDevice> resultList) {
+        ScanBleDeviceUtils.resultList = resultList;
+    }
+    public static List<BleDevice> getResultList() {
+        return resultList;
     }
 }

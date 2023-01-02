@@ -18,6 +18,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.clj.fastble.data.BleDevice;
 
@@ -31,8 +32,7 @@ public class BleScanPage extends AppCompatActivity {
     private TextView deviceName;
     private TextView deviceAddress;
 
-    private List<BleDevice> resultList;
-    private int selected = -1;
+
     private LeDeviceListAdapter leDeviceListAdapter = new LeDeviceListAdapter(this);
 
     private ReceiverForScanning receiverForScanning;
@@ -43,6 +43,8 @@ public class BleScanPage extends AppCompatActivity {
     private BleService bleService;
     private MyServiceConn myServiceConn;
     private Intent intent;
+
+    private BleDevice deviceSelected;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,7 +61,9 @@ public class BleScanPage extends AppCompatActivity {
                     deviceAddress.setText(textView.getText());
                     textView = view.findViewById(R.id.nameForSingle);
                     deviceName.setText(textView.getText());
-                    selected = i;
+                    deviceSelected = ScanBleDeviceUtils.getResultList().get(i);
+                }else{
+                    connectDevice();
                 }
 
             }
@@ -76,7 +80,7 @@ public class BleScanPage extends AppCompatActivity {
         buttonConnect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                controlBle.connectLeDeviceInPosition(selected);
+                connectDevice();
             }
         });
     }
@@ -109,7 +113,25 @@ public class BleScanPage extends AppCompatActivity {
         startService(intent);//bind the service
     }
 
-    class MyServiceConn implements ServiceConnection {
+    private void connectDevice(){
+        if(deviceSelected == null){
+            CharSequence text = "No device selected";
+            int duration = Toast.LENGTH_SHORT;
+            Toast toast = Toast.makeText(getApplicationContext(), text, duration);
+            toast.show();
+        }else{
+            controlBle.connectLeDevice(deviceSelected);
+            JavaBeanDevice javaBeanDevice = new JavaBeanDevice();
+            javaBeanDevice.setBleDevice(deviceSelected);
+            Intent intent = new Intent();
+            intent.setAction("DeviceUsed");
+            intent.putExtra("DeviceUsed", javaBeanDevice);
+            LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
+            localBroadcastManager.sendBroadcast(intent);//send this device to main page
+        }
+    }
+
+    private class MyServiceConn implements ServiceConnection {
         @Override
         public void onServiceConnected(ComponentName name, IBinder iBinder){
             controlBle = (BleService.BleBinder)iBinder;
@@ -123,9 +145,7 @@ public class BleScanPage extends AppCompatActivity {
     private class ReceiverForScanning extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            JavaBeanDevice javaBeanDevice = (JavaBeanDevice) intent.getSerializableExtra("DeviceList");
-            resultList = javaBeanDevice.getBleDeviceList();
-            leDeviceListAdapter.addDeviceList(resultList);
+            leDeviceListAdapter.addDeviceList(ScanBleDeviceUtils.getResultList());
             leDeviceListAdapter.notifyDataSetChanged();
         }
     }

@@ -117,6 +117,24 @@
                 app:srcCompat="@drawable/status_dot" />
         </LinearLayout>
 
+        <TextView
+            android:id="@+id/textViewLastTimeConnected"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="10dp"
+            android:text="Last Time Connected"
+            android:textColor="#000000"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/textViewDeviceName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:text="No Device Connected"
+            android:textColor="#000000"
+            android:textSize="20sp" />
     </LinearLayout>
 
     <LinearLayout
@@ -151,5 +169,7 @@
             android:textSize="10sp" />
 
     </LinearLayout>
+
+
 
 </LinearLayout>

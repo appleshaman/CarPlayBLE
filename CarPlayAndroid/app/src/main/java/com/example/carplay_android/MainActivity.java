@@ -16,6 +16,7 @@ import android.os.IBinder;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.clj.fastble.BleManager;
@@ -33,12 +34,9 @@ public class MainActivity extends AppCompatActivity {
     private Button buttonConnectToOld;
     private ImageView imageViewBTStatus;
     private ImageView imageViewBleStatus;
+    private TextView deviceName;
 
-    private ReceiverForBTStatus receiverForBTStatus;
-    private LocalBroadcastManager localBroadcastManagerForBTStatus;
-    private IntentFilter intentFilterForBTStatus;
-
-    private BleDevice deviceOld;
+    private BleDevice deviceUsed;
 
 
     @Override
@@ -50,13 +48,13 @@ public class MainActivity extends AppCompatActivity {
         buttonConnectToOld.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(deviceOld == null){
+                if(deviceUsed == null){
                     CharSequence text = "No previous device";
                     int duration = Toast.LENGTH_SHORT;
                     Toast toast = Toast.makeText(getApplicationContext(), text, duration);
                     toast.show();
                 }else{
-                    controlBle.connectLeDevice(deviceOld);
+                    controlBle.connectLeDevice(deviceUsed);
                 }
             }
         });
@@ -91,6 +89,7 @@ public class MainActivity extends AppCompatActivity {
         buttonScanNewDevice = findViewById(R.id.buttonScanNew);
         imageViewBleStatus = findViewById(R.id.imageViewBleStatus);
         imageViewBTStatus = findViewById(R.id.imageViewBT);
+        deviceName = findViewById(R.id.textViewDeviceName);
     }
 
     private void askPermission(){
@@ -104,10 +103,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initBroadcastReceiver(){
-        localBroadcastManagerForBTStatus = LocalBroadcastManager.getInstance(getApplicationContext());
-        receiverForBTStatus = new ReceiverForBTStatus();
-        intentFilterForBTStatus = new IntentFilter("BT");
-        localBroadcastManagerForBTStatus.registerReceiver(receiverForBTStatus, intentFilterForBTStatus);
+        IntentFilter intentFilter;
+
+        intentFilter = new IntentFilter("BT");
+        LocalBroadcastManager localBroadcastManagerForBTStatus = LocalBroadcastManager.getInstance(getApplicationContext());
+        ReceiverForBTStatus receiverForBTStatus = new ReceiverForBTStatus();
+        localBroadcastManagerForBTStatus.registerReceiver(receiverForBTStatus, intentFilter);
+
+        intentFilter = new IntentFilter("DeviceUsed");
+        LocalBroadcastManager localBroadcastManagerForDeviceUsed = LocalBroadcastManager.getInstance(getApplicationContext());
+        ReceiverForDeviceUsed receiverForDeviceUsed= new ReceiverForDeviceUsed();
+        localBroadcastManagerForDeviceUsed.registerReceiver(receiverForDeviceUsed, intentFilter);
+
     }
 
     private void initService(){
@@ -116,8 +123,6 @@ public class MainActivity extends AppCompatActivity {
         bindService(intent, myServiceConn, BIND_AUTO_CREATE);
         startService(intent);//bind the service
     }
-
-
 
     class MyServiceConn implements ServiceConnection {
         @Override
@@ -129,6 +134,7 @@ public class MainActivity extends AppCompatActivity {
         public void onServiceDisconnected(ComponentName name){
         }
     }
+
     class ReceiverForBTStatus extends BroadcastReceiver{
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -137,7 +143,15 @@ public class MainActivity extends AppCompatActivity {
             }else{
                 imageViewBTStatus.setColorFilter(0x9c9c9c);
             }
+        }
+    }
 
+    class ReceiverForDeviceUsed extends BroadcastReceiver{
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            JavaBeanDevice javaBeanDevice = (JavaBeanDevice) intent.getSerializableExtra("DeviceUsed");
+            deviceUsed = javaBeanDevice.getBleDevice();
+            deviceName.setText(deviceUsed.getName());
         }
     }
 
