@@ -41,6 +41,7 @@ public class ScanBleDeviceUtils {
             public void onScanFinished(List<BleDevice> scanResultList) {
                 resultList = scanResultList;
                 JavaBeanDevice javaBeanDeviceList = new JavaBeanDevice();
+                javaBeanDeviceList.setBleDeviceList(resultList);
                 Intent intent = new Intent();
                 intent.setAction("DeviceList");
                 intent.putExtra("DeviceList", javaBeanDeviceList);
