@@ -42,8 +42,9 @@
             <ImageView
                 android:id="@+id/imageViewBT"
                 android:layout_width="20dp"
-                android:layout_height="match_parent"
-                app:srcCompat="@android:drawable/presence_invisible" />
+                android:layout_height="20dp"
+                android:layout_gravity="center"
+                app:srcCompat="@drawable/status_dot" />
         </LinearLayout>
 
         <LinearLayout
@@ -64,8 +65,9 @@
             <ImageView
                 android:id="@+id/imageViewBleStatus"
                 android:layout_width="20dp"
-                android:layout_height="match_parent"
-                app:srcCompat="@android:drawable/presence_invisible" />
+                android:layout_height="20dp"
+                android:layout_gravity="center"
+                app:srcCompat="@drawable/status_dot" />
         </LinearLayout>
 
         <LinearLayout
@@ -87,8 +89,9 @@
             <ImageView
                 android:id="@+id/imageViewNotification"
                 android:layout_width="20dp"
-                android:layout_height="match_parent"
-                app:srcCompat="@android:drawable/presence_invisible" />
+                android:layout_height="20dp"
+                android:layout_gravity="center"
+                app:srcCompat="@drawable/status_dot" />
         </LinearLayout>
 
         <LinearLayout
@@ -109,8 +112,9 @@
             <ImageView
                 android:id="@+id/imageViewDevice"
                 android:layout_width="20dp"
-                android:layout_height="match_parent"
-                app:srcCompat="@android:drawable/presence_invisible" />
+                android:layout_height="20dp"
+                android:layout_gravity="center"
+                app:srcCompat="@drawable/status_dot" />
         </LinearLayout>
 
     </LinearLayout>
@@ -125,7 +129,7 @@
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/buttonScan"
+            android:id="@+id/buttonScanNew"
             android:layout_width="0dp"
             android:layout_height="30dp"
             android:layout_marginHorizontal="5dp"
@@ -136,7 +140,7 @@
             android:textSize="10sp" />
 
         <Button
-            android:id="@+id/buttonConnect"
+            android:id="@+id/buttonConnectOld"
             android:layout_width="0dp"
             android:layout_height="30dp"
             android:layout_marginHorizontal="5dp"

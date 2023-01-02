@@ -2,8 +2,6 @@ package com.example.carplay_android;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
-import android.util.Log;
 import android.widget.Toast;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -17,8 +15,7 @@ import java.util.List;
 
 public class ScanBleDeviceUtils {
     static List<BleDevice> resultList;
-    public static List<BleDevice> scanLeDevice(Context context) {
-
+    public static void scanLeDevice(Context context) {
         BleScanRuleConfig scanRuleConfig = new BleScanRuleConfig.Builder()
                 .setScanTimeOut(10000)
                 .build();
@@ -28,7 +25,6 @@ public class ScanBleDeviceUtils {
             public void onScanStarted(boolean success) {
                 CharSequence text = "Scan start";
                 int duration = Toast.LENGTH_SHORT;
-
                 Toast toast = Toast.makeText(context, text, duration);
                 toast.show();
             }
@@ -43,10 +39,14 @@ public class ScanBleDeviceUtils {
 
             @Override
             public void onScanFinished(List<BleDevice> scanResultList) {
-                Log.d("s", "Finished");
                 resultList = scanResultList;
+                JavaBeanDevice javaBeanDeviceList = new JavaBeanDevice();
+                Intent intent = new Intent();
+                intent.setAction("DeviceList");
+                intent.putExtra("DeviceList", javaBeanDeviceList);
+                LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
+                localBroadcastManager.sendBroadcast(intent);
             }
         });
-        return resultList;
     }
 }

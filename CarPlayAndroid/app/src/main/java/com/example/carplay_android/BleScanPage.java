@@ -3,8 +3,16 @@ package com.example.carplay_android;
 import static com.example.carplay_android.ScanBleDeviceUtils.scanLeDevice;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -27,10 +35,25 @@ public class BleScanPage extends AppCompatActivity {
     private int selected = -1;
     private LeDeviceListAdapter leDeviceListAdapter = new LeDeviceListAdapter(this);
 
+    private ReceiverForScanning receiverForScanning;
+    private LocalBroadcastManager localBroadcastManagerForScanning;
+    private IntentFilter intentFilterForScanning;
+
+    private BleService.BleBinder controlBle;
+    private BleService bleService;
+    private MyServiceConn myServiceConn;
+    private Intent intent;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ble_scan_page);
+        init();
+
+        myServiceConn = new MyServiceConn();
+        intent = new Intent(this, BleService.class);
+        bindService(intent, myServiceConn, BIND_AUTO_CREATE);
+        startService(intent);//bind the service
 
         bleList.setAdapter(leDeviceListAdapter);
         bleList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -43,7 +66,7 @@ public class BleScanPage extends AppCompatActivity {
                     deviceName.setText(textView.getText());
                     selected = i;
                 }
-                connectLeDevice(selected);
+
             }
         });
 
@@ -51,24 +74,63 @@ public class BleScanPage extends AppCompatActivity {
         buttonScan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                resultList = scanLeDevice(getApplicationContext());
+                scanLeDevice(getApplicationContext());
             }
         });
 
         buttonConnect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                connectLeDevice(selected);
+                controlBle.connectLeDeviceInPosition(selected);
             }
         });
     }
 
-    private void initial(){
-        buttonScan = findViewById(R.id.buttonScan);
-        buttonConnect = findViewById(R.id.buttonConnect);
+    private void init(){
+        initComponents();
+        initBroadcastReceiver();
+    }
+
+    private void initComponents(){
+        buttonScan = findViewById(R.id.buttonScanNew);
+        buttonConnect = findViewById(R.id.buttonConnectOld);
         bleList = findViewById(R.id.deviceList);
         deviceAddress = findViewById(R.id.deviceAddress);
         deviceName = findViewById(R.id.deviceName);
+    }
+
+    private void initBroadcastReceiver(){
+        localBroadcastManagerForScanning = LocalBroadcastManager.getInstance(getApplicationContext());
+        receiverForScanning = new ReceiverForScanning();
+        intentFilterForScanning = new IntentFilter("DeviceList");
+        localBroadcastManagerForScanning.registerReceiver(receiverForScanning, intentFilterForScanning);
+    }
+
+    class MyServiceConn implements ServiceConnection {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder iBinder){
+            controlBle = (BleService.BleBinder)iBinder;
+            bleService = controlBle.getService();
+        }
+        @Override
+        public void onServiceDisconnected(ComponentName name){
+        }
+    }
+
+    private class ReceiverForScanning extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            JavaBeanDevice javaBeanDevice = (JavaBeanDevice) intent.getSerializableExtra("DeviceList");
+            resultList = javaBeanDevice.getBleDeviceList();
+            leDeviceListAdapter.addDeviceList(resultList);
+            leDeviceListAdapter.notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unbindService(myServiceConn);
     }
 }
 

@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -50,14 +51,7 @@ public class BleService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-//        BleManager.getInstance().init(getApplication());
-//        if(BleManager.getInstance().isSupportBle()){
-//            Log.d("s","support");
-//            if(!BleManager.getInstance().isBlueEnable()){
-//                Log.d("s","Not enable");
-//                BleManager.getInstance().enableBluetooth();
-//            }
-//        }
+        setBTCheckTimer();
     }
 
     public void setBTCheckTimer(){
@@ -67,16 +61,24 @@ public class BleService extends Service {
                 @Override
                 public void run() {
                     BleManager.getInstance().init(getApplication());
-                    Bundle bundle = new Bundle();
+                    boolean status = false;
                     if(BleManager.getInstance().isSupportBle()){
                         if(!BleManager.getInstance().isBlueEnable()){
                             BleManager.getInstance().enableBluetooth();
+                            //check again see if BT is enabled
+                            status = !BleManager.getInstance().isBlueEnable();
+                        }else{
+                            status = true;
                         }
                     }
-                    bundle.putBoolean("support", false);
-
+                    Intent intent = new Intent();
+                    intent.setAction("BT");
+                    intent.putExtra("BT", status);
+                    LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
+                    localBroadcastManager.sendBroadcast(intent);
                 }
             };
+            timerBTState.schedule(timerTask, 10, 1000);
         }
     }
 
@@ -84,11 +86,11 @@ public class BleService extends Service {
         public BleService getService() {
             return BleService.this;
         }
-
-
+        public void connectLeDeviceInPosition(int position) {
+            connectLeDevice(ScanBleDeviceUtils.resultList.get(position));
         }
-        private void connectLeDevice(int position){
-            BleManager.getInstance().connect((BleDevice) leDeviceListAdapter.getItem(position), new BleGattCallback() {
+        public void connectLeDevice(BleDevice bleDevice){
+            BleManager.getInstance().connect((BleDevice) bleDevice, new BleGattCallback() {
                 @Override
                 public void onStartConnect() {
 
@@ -169,8 +171,6 @@ public class BleService extends Service {
 
     //通过binder实现调用者client与Service之间的通信
     private BleBinder binder = new BleBinder();
-
-    private static final long SCAN_PERIOD = 5000;
 
 
 }
