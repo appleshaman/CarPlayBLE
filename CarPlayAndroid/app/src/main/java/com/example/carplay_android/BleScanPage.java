@@ -1,6 +1,5 @@
 package com.example.carplay_android;
 
-
 import static com.example.carplay_android.ScanBleDeviceUtils.scanLeDevice;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -32,29 +31,26 @@ public class BleScanPage extends AppCompatActivity {
     private TextView deviceName;
     private TextView deviceAddress;
 
+    private List<BleDevice> resultList;
+    private int selected = -1;
+    private LeDeviceListAdapter leDeviceListAdapter = new LeDeviceListAdapter(this);
+
+    private ReceiverForScanning receiverForScanning;
+    private LocalBroadcastManager localBroadcastManagerForScanning;
+    private IntentFilter intentFilterForScanning;
+
     private BleService.BleBinder controlBle;
     private BleService bleService;
     private MyServiceConn myServiceConn;
     private Intent intent;
 
-    private List<BleDevice> resultList;
-    private int selected = -1;
-    private final LeDeviceListAdapter leDeviceListAdapter = new LeDeviceListAdapter(this);
-
-    private ReceiverForDeviceList receiverForDeviceList;
-    private LocalBroadcastManager localBroadcastManagerForDeviceList;
-    private IntentFilter intentFilterForDeviceList;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ble_scan_page);
-        initialComponent();
-        initBroadcastListenersForDeviceList();
+        init();
 
-        intent = new Intent(this, BleService.class);
         myServiceConn = new MyServiceConn();
-        bindService(intent, myServiceConn, BIND_AUTO_CREATE);
         intent = new Intent(this, BleService.class);
         bindService(intent, myServiceConn, BIND_AUTO_CREATE);
         startService(intent);//bind the service
@@ -69,8 +65,6 @@ public class BleScanPage extends AppCompatActivity {
                     textView = view.findViewById(R.id.nameForSingle);
                     deviceName.setText(textView.getText());
                     selected = i;
-                }else{
-                    controlBle.connectLeDeviceInPosition(selected);
                 }
 
             }
@@ -92,15 +86,44 @@ public class BleScanPage extends AppCompatActivity {
         });
     }
 
+    private void init(){
+        initComponents();
+        initBroadcastReceiver();
+    }
+
+    private void initComponents(){
+        buttonScan = findViewById(R.id.buttonScanNew);
+        buttonConnect = findViewById(R.id.buttonConnectOld);
+        bleList = findViewById(R.id.deviceList);
+        deviceAddress = findViewById(R.id.deviceAddress);
+        deviceName = findViewById(R.id.deviceName);
+    }
+
+    private void initBroadcastReceiver(){
+        localBroadcastManagerForScanning = LocalBroadcastManager.getInstance(getApplicationContext());
+        receiverForScanning = new ReceiverForScanning();
+        intentFilterForScanning = new IntentFilter("DeviceList");
+        localBroadcastManagerForScanning.registerReceiver(receiverForScanning, intentFilterForScanning);
+    }
+
     class MyServiceConn implements ServiceConnection {
         @Override
         public void onServiceConnected(ComponentName name, IBinder iBinder){
             controlBle = (BleService.BleBinder)iBinder;
             bleService = controlBle.getService();
-
         }
         @Override
         public void onServiceDisconnected(ComponentName name){
+        }
+    }
+
+    private class ReceiverForScanning extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            JavaBeanDevice javaBeanDevice = (JavaBeanDevice) intent.getSerializableExtra("DeviceList");
+            resultList = javaBeanDevice.getBleDeviceList();
+            leDeviceListAdapter.addDeviceList(resultList);
+            leDeviceListAdapter.notifyDataSetChanged();
         }
     }
 
@@ -108,31 +131,6 @@ public class BleScanPage extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         unbindService(myServiceConn);
-    }
-
-    private void initialComponent(){
-        buttonScan = findViewById(R.id.buttonScanNewDevice);
-        buttonConnect = findViewById(R.id.buttonConnectOld);
-        bleList = findViewById(R.id.deviceList);
-        deviceAddress = findViewById(R.id.deviceAddress);
-        deviceName = findViewById(R.id.deviceName);
-    }
-
-    private void initBroadcastListenersForDeviceList(){
-        localBroadcastManagerForDeviceList = LocalBroadcastManager.getInstance(this);// register a receiver to receive the information about devices that scanned
-        intentFilterForDeviceList = new IntentFilter("deviceList");
-        receiverForDeviceList = new ReceiverForDeviceList();
-        localBroadcastManagerForDeviceList.registerReceiver(receiverForDeviceList, intentFilterForDeviceList);
-    }
-
-    public class ReceiverForDeviceList extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            JavaBeanDevice javaBeanDevice = (JavaBeanDevice) intent.getSerializableExtra("deviceList");
-            resultList = javaBeanDevice.getBleDevices();
-            leDeviceListAdapter.addDeviceList(resultList);
-            leDeviceListAdapter.notifyDataSetChanged();
-        }
     }
 }
 

@@ -3,6 +3,7 @@ package com.example.carplay_android;
 
 import android.app.Notification;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.service.notification.NotificationListenerService;
@@ -10,9 +11,16 @@ import android.service.notification.StatusBarNotification;
 import android.util.Log;
 import android.widget.Toast;
 
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
+import com.clj.fastble.BleManager;
+
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class NotificationService extends NotificationListenerService {
-
-
+    private Timer timerNotificationStatus;
+    private boolean ifRunning = false;
     public NotificationService() {
         Log.d("1","Created");
     }
@@ -24,9 +32,29 @@ public class NotificationService extends NotificationListenerService {
         Context context = getApplicationContext();
         CharSequence text = "onCreate";
         int duration = Toast.LENGTH_SHORT;
-
+        ifRunning = true;
         Toast toast = Toast.makeText(context, text, duration);
         toast.show();
+    }
+
+    public void setTimer(){
+        if(timerNotificationStatus == null){
+            timerNotificationStatus = new Timer();
+            TimerTask timerTask = new TimerTask() {
+                @Override
+                public void run() {
+                    Bundle bundle = new Bundle();
+                    bundle.putBoolean("notification", ifRunning);
+                    ifRunning = false;
+                    Intent intent = new Intent();
+                    intent.putExtra("notificationStatus", bundle);
+                    intent.setAction("notification");// for intent filter to fit different information
+                    LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
+                    localBroadcastManager.sendBroadcast(intent);
+                }
+            };
+            timerNotificationStatus.schedule(timerTask,10, 5000);
+        }
     }
 
     @Override
@@ -50,7 +78,6 @@ public class NotificationService extends NotificationListenerService {
         if(!sbn.isOngoing() || !sbn.getPackageName().contains("com.google.android.apps.maps")){
             return false;
         }
-
         return (sbn.getId() == 1);
     }
 

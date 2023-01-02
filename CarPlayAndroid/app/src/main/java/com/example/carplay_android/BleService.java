@@ -1,77 +1,96 @@
 package com.example.carplay_android;
 
-import android.Manifest;
-import android.annotation.SuppressLint;
-import android.app.Application;
 import android.app.Service;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
-import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
-import android.bluetooth.BluetoothManager;
-import android.bluetooth.BluetoothProfile;
-import android.bluetooth.le.BluetoothLeScanner;
-import android.bluetooth.le.ScanCallback;
-import android.bluetooth.le.ScanResult;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.text.TextUtils;
 import android.util.Log;
-
+import android.widget.Toast;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import java.util.Scanner;
+
+import com.clj.fastble.BleManager;
+import com.clj.fastble.callback.BleGattCallback;
+import com.clj.fastble.callback.BleReadCallback;
+import com.clj.fastble.callback.BleScanCallback;
+import com.clj.fastble.callback.BleWriteCallback;
+import com.clj.fastble.data.BleDevice;
+import com.clj.fastble.exception.BleException;
+import com.clj.fastble.scan.BleScanRuleConfig;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
+
 
 public class BleService extends Service {
 
-<<<<<<< Updated upstream
-    private BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-    private BluetoothLeScanner bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
-    private boolean scanning;
-    private Handler handler = new Handler();
-=======
 
->>>>>>> Stashed changes
+    private Timer timerBTState;
+    private Handler handler = new Handler();
+
 
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return new BleBinder();
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
-<<<<<<< Updated upstream
-
+        setBTCheckTimer();
     }
 
-=======
+    public void setBTCheckTimer(){
+        if(timerBTState == null){
+            timerBTState = new Timer();
+            TimerTask  timerTask = new TimerTask() {
+                @Override
+                public void run() {
+                    BleManager.getInstance().init(getApplication());
+                    boolean status = false;
+                    if(BleManager.getInstance().isSupportBle()){
+                        if(!BleManager.getInstance().isBlueEnable()){
+                            BleManager.getInstance().enableBluetooth();
+                            //check again see if BT is enabled
+                            status = !BleManager.getInstance().isBlueEnable();
+                        }else{
+                            status = true;
+                        }
+                    }
+                    Intent intent = new Intent();
+                    intent.setAction("BT");
+                    intent.putExtra("BT", status);
+                    LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
+                    localBroadcastManager.sendBroadcast(intent);
+                }
+            };
+            timerBTState.schedule(timerTask, 10, 1000);
+        }
     }
-
-
 
     public class BleBinder extends Binder {
         public BleService getService() {
             return BleService.this;
         }
-        public void connectLeDeviceInPosition(int position){
-            connectLeDevice((BleDevice) ScanBleDeviceUtils.getDevice(position));
+        public void connectLeDeviceInPosition(int position) {
+            connectLeDevice(ScanBleDeviceUtils.resultList.get(position));
         }
         public void connectLeDevice(BleDevice bleDevice){
-            BleManager.getInstance().connect(bleDevice, new BleGattCallback() {
+            BleManager.getInstance().connect((BleDevice) bleDevice, new BleGattCallback() {
                 @Override
                 public void onStartConnect() {
 
@@ -84,9 +103,7 @@ public class BleService extends Service {
 
                 @Override
                 public void onConnectSuccess(BleDevice bleDevice, BluetoothGatt gatt, int status) {
-                    broadcastTheDevice(bleDevice);
                     Log.d("s","Connect success");
-
                     List<BluetoothGattService> serviceList = gatt.getServices();
                     for (BluetoothGattService service : serviceList) {
                         UUID uuid_service = service.getUuid();
@@ -140,68 +157,21 @@ public class BleService extends Service {
                                 });
                     }
 
->>>>>>> Stashed changes
 
-    // Stops scanning after 10 seconds.
-    private static final long SCAN_PERIOD = 10000;
-
-    private void scanLeDevice() {
-        if (!scanning) {
-            // Stops scanning after a predefined scan period.
-            handler.postDelayed(new Runnable() {
-                @SuppressLint("MissingPermission")
-                @Override
-                public void run() {
-                    scanning = false;
-                    bluetoothLeScanner.stopScan(leScanCallback);
                 }
-            }, SCAN_PERIOD);
 
-            scanning = true;
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
-                return;
-            }
-            bluetoothLeScanner.startScan(leScanCallback);
-        } else {
-            scanning = false;
-            bluetoothLeScanner.stopScan(leScanCallback);
+                @Override
+                public void onDisConnected(boolean isActiveDisConnected, BleDevice device, BluetoothGatt gatt, int status) {
+                    Log.d("s","Disconnected");
+                }
+            });
         }
-    }
-
-<<<<<<< Updated upstream
-    private LeDeviceListAdapter leDeviceListAdapter = new LeDeviceListAdapter();
-    // Device scan callback.
-    private ScanCallback leScanCallback =
-            new ScanCallback() {
-                @Override
-                public void onScanResult(int callbackType, ScanResult result) {
-                    super.onScanResult(callbackType, result);
-                    leDeviceListAdapter.addDevice(result.getDevice());
-                    leDeviceListAdapter.notifyDataSetChanged();
-                }
-            };
-
-=======
-
-    private void broadcastTheDevice(BleDevice bleDevice){
-        JavaBeanDevice javaBeanDevice = new JavaBeanDevice();
-        javaBeanDevice.setBleDevice(bleDevice);
-        Intent intent = new Intent();
-        intent.putExtra("device", javaBeanDevice);
-        intent.setAction("device");// for intent filter to fit different information
-        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
-        localBroadcastManager.sendBroadcast(intent);
 
     }
 
->>>>>>> Stashed changes
+    //通过binder实现调用者client与Service之间的通信
+    private BleBinder binder = new BleBinder();
 
 
 }
+

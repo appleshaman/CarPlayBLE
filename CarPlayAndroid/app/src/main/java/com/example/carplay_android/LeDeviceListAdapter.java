@@ -2,50 +2,57 @@ package com.example.carplay_android;
 
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothDevice;
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import com.clj.fastble.data.BleDevice;
+
 import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class LeDeviceListAdapter extends BaseAdapter {
-    private ArrayList<BluetoothDevice> mLeDevices;
-    private LayoutInflater mInflator;
-    static class ViewHolder {
+    private List<BleDevice> bleDeviceLeDevices;
+    //private List<String> bleDeviceLeDevices = new ArrayList<>();
+    private LayoutInflater layoutInflater;
+    private Context mContext;
+
+    private final ExecutorService e1 = Executors.newSingleThreadScheduledExecutor();
+
+    class ViewHolder {
         TextView deviceName;
         TextView deviceAddress;
     }
 
-    public LeDeviceListAdapter() {
-        super();
-        mLeDevices = new ArrayList<BluetoothDevice>();
-        mInfl  ator = MainActivity.this.getLayoutInflater();
+    public LeDeviceListAdapter(Context context){
+        mContext = context;
     }
 
-    public void addDevice(BluetoothDevice device) {
-        if(!mLeDevices.contains(device)) {
-            mLeDevices.add(device);
-        }
-    }
-
-    public BluetoothDevice getDevice(int position) {
-        return mLeDevices.get(position);
+    public void addDeviceList(List<BleDevice> devices) {
+            bleDeviceLeDevices = devices;
     }
 
     public void clear() {
-        mLeDevices.clear();
+        bleDeviceLeDevices.clear();
     }
 
     @Override
     public int getCount() {
-        return mLeDevices.size();
+        if(bleDeviceLeDevices != null){
+            return bleDeviceLeDevices.size();
+        }
+        return 0;
+
     }
 
     @Override
     public Object getItem(int i) {
-        return mLeDevices.get(i);
+        return bleDeviceLeDevices.get(i);
     }
 
     @Override
@@ -58,23 +65,18 @@ public class LeDeviceListAdapter extends BaseAdapter {
         ViewHolder viewHolder;
         // General ListView optimization code.
         if (view == null) {
-            view = mInflator.inflate(R.layout.listitem_device, null);
+            view = LayoutInflater.from(mContext).inflate(R.layout.device_information, viewGroup, false);
             viewHolder = new ViewHolder();
-            viewHolder.deviceAddress = (TextView) view.findViewById(R.id.device_address);
-            viewHolder.deviceName = (TextView) view.findViewById(R.id.device_name);
+            viewHolder.deviceAddress = (TextView) view.findViewById(R.id.addressForSingle);
+            viewHolder.deviceName = (TextView) view.findViewById(R.id.nameForSingle);
             view.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolder) view.getTag();
         }
-
-        BluetoothDevice device = mLeDevices.get(i);
-        @SuppressLint("MissingPermission") final String deviceName = device.getName();
-        if (deviceName != null && deviceName.length() > 0)
-            viewHolder.deviceName.setText(deviceName);
-        else
-            viewHolder.deviceName.setText(R.string.unknown_device);
-        viewHolder.deviceAddress.setText(device.getAddress());
-
+        e1.submit(()->{
+            viewHolder.deviceAddress.post(() -> viewHolder.deviceAddress.setText(bleDeviceLeDevices.get(i).getMac()));
+            viewHolder.deviceName.post(() -> viewHolder.deviceName.setText(bleDeviceLeDevices.get(i).getName()));
+        });
         return view;
     }
 }

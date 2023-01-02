@@ -87,7 +87,7 @@
         </LinearLayout>
 
         <Button
-            android:id="@+id/buttonScanNewDevice"
+            android:id="@+id/buttonScanNew"
             android:layout_width="0dp"
             android:layout_height="30dp"
             android:layout_marginHorizontal="5dp"

@@ -17,26 +17,26 @@ import java.io.Serializable;
 import java.util.List;
 
 public class JavaBeanDevice implements Serializable {
-    private BleDevice bleDevice;
-    private List<BleDevice> bleDevices;
+    BleDevice bleDevice;
+    List<BleDevice> bleDeviceList;
+
+    public void setBleDevice(BleDevice bleDevice) {
+        this.bleDevice = bleDevice;
+    }
+
+    public void setBleDeviceList(List<BleDevice> bleDeviceList) {
+        this.bleDeviceList = bleDeviceList;
+    }
 
     public BleDevice getBleDevice() {
         return bleDevice;
     }
 
-    public List<BleDevice> getBleDevices() {
-        return bleDevices;
+    public List<BleDevice> getBleDeviceList() {
+        return bleDeviceList;
     }
 
-    public void setBleDevices(List<BleDevice> bleDevices) {
-        this.bleDevices = bleDevices;
-    }
-
-    public String getName() {
+    public String getName(){
         return bleDevice.getName();
-    }
-
-    public void setBleDevice(BleDevice bleDevice) {
-        this.bleDevice = bleDevice;
     }
 }

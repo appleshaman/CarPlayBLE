@@ -2,8 +2,6 @@ package com.example.carplay_android;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
-import android.util.Log;
 import android.widget.Toast;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -13,14 +11,11 @@ import com.clj.fastble.callback.BleScanCallback;
 import com.clj.fastble.data.BleDevice;
 import com.clj.fastble.scan.BleScanRuleConfig;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ScanBleDeviceUtils {
-    private static List<BleDevice> resultList;
-
+    static List<BleDevice> resultList;
     public static void scanLeDevice(Context context) {
-
         BleScanRuleConfig scanRuleConfig = new BleScanRuleConfig.Builder()
                 .setScanTimeOut(10000)
                 .build();
@@ -44,23 +39,14 @@ public class ScanBleDeviceUtils {
 
             @Override
             public void onScanFinished(List<BleDevice> scanResultList) {
-                Log.d("s", "Finished");
                 resultList = scanResultList;
-
-                JavaBeanDevice javaBeanDevice = new JavaBeanDevice();
-                javaBeanDevice.setBleDevices(scanResultList);
+                JavaBeanDevice javaBeanDeviceList = new JavaBeanDevice();
                 Intent intent = new Intent();
-                intent.putExtra("deviceList", javaBeanDevice);
-                intent.setAction("deviceList");// for intent filter to fit different information
+                intent.setAction("DeviceList");
+                intent.putExtra("DeviceList", javaBeanDeviceList);
                 LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
                 localBroadcastManager.sendBroadcast(intent);
             }
         });
-    }
-
-
-
-    public static BleDevice getDevice(int position){
-        return resultList.get(position);
     }
 }

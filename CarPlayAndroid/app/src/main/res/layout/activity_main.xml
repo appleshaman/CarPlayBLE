@@ -9,17 +9,17 @@
     >
 
     <LinearLayout
-        android:id="@+id/Upper"
+        android:id="@+id/upper"
         android:layout_width="match_parent"
-        android:layout_height="65dp"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:background="@color/red"
-        android:orientation="horizontal"></LinearLayout>
+        android:orientation="horizontal">
 
-    <ListView
+    </LinearLayout>
+
+    <LinearLayout
         android:layout_width="match_parent"
-<<<<<<< Updated upstream
-        android:layout_height="585dp" />
-=======
         android:layout_height="0dp"
         android:layout_weight="9"
         android:orientation="vertical">
@@ -43,8 +43,8 @@
                 android:id="@+id/imageViewBT"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
-                android:layout_margin="5dp"
-                app:srcCompat="@drawable/little_dot" />
+                android:layout_gravity="center"
+                app:srcCompat="@drawable/status_dot" />
         </LinearLayout>
 
         <LinearLayout
@@ -63,11 +63,11 @@
                 android:textSize="20sp" />
 
             <ImageView
-                android:id="@+id/imageViewBle"
+                android:id="@+id/imageViewBleStatus"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
-                android:layout_margin="5dp"
-                app:srcCompat="@drawable/little_dot" />
+                android:layout_gravity="center"
+                app:srcCompat="@drawable/status_dot" />
         </LinearLayout>
 
         <LinearLayout
@@ -90,8 +90,8 @@
                 android:id="@+id/imageViewNotification"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
-                android:layout_margin="5dp"
-                app:srcCompat="@drawable/little_dot" />
+                android:layout_gravity="center"
+                app:srcCompat="@drawable/status_dot" />
         </LinearLayout>
 
         <LinearLayout
@@ -113,84 +113,43 @@
                 android:id="@+id/imageViewDevice"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
-                app:srcCompat="@drawable/little_dot"
-                android:layout_margin="5dp" />
+                android:layout_gravity="center"
+                app:srcCompat="@drawable/status_dot" />
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/textViewBlank"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <TextView
-            android:id="@+id/textViewDeviceNameLabel"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:text="Last Time Connected"
-            android:textColor="#000000"
-            android:textSize="24sp" />
-
-        <TextView
-            android:id="@+id/textViewDeviceName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:text="No"
-            android:textColor="#000000"
-            android:textSize="24sp" />
-
     </LinearLayout>
->>>>>>> Stashed changes
 
     <LinearLayout
+        android:id="@+id/lower"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:background="@color/red"
         android:gravity="right|center_vertical"
         android:orientation="horizontal">
 
         <Button
-<<<<<<< Updated upstream
-            android:id="@+id/button2"
-            android:layout_width="80dp"
-=======
-            android:id="@+id/buttonScanNewDevice"
+            android:id="@+id/buttonScanNew"
             android:layout_width="0dp"
->>>>>>> Stashed changes
             android:layout_height="30dp"
             android:layout_marginHorizontal="5dp"
-            android:layout_weight="0"
+            android:layout_weight="1"
             android:background="@drawable/button"
-<<<<<<< Updated upstream
-            android:text="Button"
-            android:textColor="@color/white" />
-
-        <Button
-            android:id="@+id/button3"
-            android:layout_width="80dp"
-=======
-            android:text="Scan New Device"
+            android:text="Scan"
             android:textColor="@color/white"
             android:textSize="10sp" />
 
         <Button
             android:id="@+id/buttonConnectOld"
             android:layout_width="0dp"
->>>>>>> Stashed changes
             android:layout_height="30dp"
             android:layout_marginHorizontal="5dp"
-            android:layout_weight="0"
+            android:layout_weight="1"
             android:background="@drawable/button"
-<<<<<<< Updated upstream
-            android:text="Button"
-            android:textColor="@color/white" />
-=======
-            android:text="Connect To Current Device"
+            android:text="Connect"
             android:textColor="@color/white"
             android:textSize="10sp" />
 
->>>>>>> Stashed changes
     </LinearLayout>
 
 </LinearLayout>
