@@ -50,11 +50,6 @@ public class BleScanPage extends AppCompatActivity {
         setContentView(R.layout.activity_ble_scan_page);
         init();
 
-        myServiceConn = new MyServiceConn();
-        intent = new Intent(this, BleService.class);
-        bindService(intent, myServiceConn, BIND_AUTO_CREATE);
-        startService(intent);//bind the service
-
         bleList.setAdapter(leDeviceListAdapter);
         bleList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -89,6 +84,7 @@ public class BleScanPage extends AppCompatActivity {
     private void init(){
         initComponents();
         initBroadcastReceiver();
+        initService();
     }
 
     private void initComponents(){
@@ -104,6 +100,13 @@ public class BleScanPage extends AppCompatActivity {
         receiverForScanning = new ReceiverForScanning();
         intentFilterForScanning = new IntentFilter("DeviceList");
         localBroadcastManagerForScanning.registerReceiver(receiverForScanning, intentFilterForScanning);
+    }
+
+    private void initService(){
+        myServiceConn = new MyServiceConn();
+        intent = new Intent(this, BleService.class);
+        bindService(intent, myServiceConn, BIND_AUTO_CREATE);
+        startService(intent);//bind the service
     }
 
     class MyServiceConn implements ServiceConnection {

@@ -13,10 +13,13 @@ import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.clj.fastble.BleManager;
+import com.clj.fastble.data.BleDevice;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -35,18 +38,37 @@ public class MainActivity extends AppCompatActivity {
     private LocalBroadcastManager localBroadcastManagerForBTStatus;
     private IntentFilter intentFilterForBTStatus;
 
+    private BleDevice deviceOld;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         init();
 
-        myServiceConn = new MyServiceConn();
-        intent = new Intent(this, BleService.class);
-        bindService(intent, myServiceConn, BIND_AUTO_CREATE);
-        startService(intent);//bind the service
+        buttonConnectToOld.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(deviceOld == null){
+                    CharSequence text = "No previous device";
+                    int duration = Toast.LENGTH_SHORT;
+                    Toast toast = Toast.makeText(getApplicationContext(), text, duration);
+                    toast.show();
+                }else{
+                    controlBle.connectLeDevice(deviceOld);
+                }
+            }
+        });
+
+        buttonScanNewDevice.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), BleScanPage.class);
+                startActivity(intent);
+            }
+        });
+
 
 
 
@@ -61,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
         askPermission();
         initComponents();
         initBroadcastReceiver();
+        initService();
     }
 
     private void initComponents(){
@@ -85,6 +108,13 @@ public class MainActivity extends AppCompatActivity {
         receiverForBTStatus = new ReceiverForBTStatus();
         intentFilterForBTStatus = new IntentFilter("BT");
         localBroadcastManagerForBTStatus.registerReceiver(receiverForBTStatus, intentFilterForBTStatus);
+    }
+
+    private void initService(){
+        myServiceConn = new MyServiceConn();
+        intent = new Intent(this, BleService.class);
+        bindService(intent, myServiceConn, BIND_AUTO_CREATE);
+        startService(intent);//bind the service
     }
 
 

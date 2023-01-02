@@ -135,7 +135,7 @@
             android:layout_marginHorizontal="5dp"
             android:layout_weight="1"
             android:background="@drawable/button"
-            android:text="Scan"
+            android:text="Scan New Device"
             android:textColor="@color/white"
             android:textSize="10sp" />
 
@@ -146,7 +146,7 @@
             android:layout_marginHorizontal="5dp"
             android:layout_weight="1"
             android:background="@drawable/button"
-            android:text="Connect"
+            android:text="Connect Previous Device"
             android:textColor="@color/white"
             android:textSize="10sp" />
 
