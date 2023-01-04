@@ -22,8 +22,6 @@ import android.widget.Toast;
 
 import com.clj.fastble.data.BleDevice;
 
-import java.util.List;
-
 public class BleScanPage extends AppCompatActivity {
 
     private Button buttonScan;
@@ -92,7 +90,7 @@ public class BleScanPage extends AppCompatActivity {
     }
 
     private void initComponents(){
-        buttonScan = findViewById(R.id.buttonScanNew);
+        buttonScan = findViewById(R.id.buttonNotification);
         buttonConnect = findViewById(R.id.buttonConnectOld);
         bleList = findViewById(R.id.deviceList);
         deviceAddress = findViewById(R.id.deviceAddress);

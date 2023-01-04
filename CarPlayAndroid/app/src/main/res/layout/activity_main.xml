@@ -147,13 +147,13 @@
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/buttonScanNew"
+            android:id="@+id/buttonNotification"
             android:layout_width="0dp"
             android:layout_height="30dp"
             android:layout_marginHorizontal="5dp"
             android:layout_weight="1"
             android:background="@drawable/button"
-            android:text="Scan New Device"
+            android:text="Open Notification Access"
             android:textColor="@color/white"
             android:textSize="10sp" />
 
@@ -165,6 +165,17 @@
             android:layout_weight="1"
             android:background="@drawable/button"
             android:text="Connect Previous Device"
+            android:textColor="@color/white"
+            android:textSize="10sp" />
+
+        <Button
+            android:id="@+id/buttonScanNew"
+            android:layout_width="0dp"
+            android:layout_height="30dp"
+            android:layout_marginHorizontal="5dp"
+            android:layout_weight="1"
+            android:background="@drawable/button"
+            android:text="Scan New Device"
             android:textColor="@color/white"
             android:textSize="10sp" />
 

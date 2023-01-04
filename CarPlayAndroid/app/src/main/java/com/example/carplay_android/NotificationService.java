@@ -11,51 +11,32 @@ import android.service.notification.StatusBarNotification;
 import android.util.Log;
 import android.widget.Toast;
 
+
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import com.clj.fastble.BleManager;
-
-import java.util.Timer;
-import java.util.TimerTask;
-
 public class NotificationService extends NotificationListenerService {
-    private Timer timerNotificationStatus;
-    private boolean ifRunning = false;
     public NotificationService() {
-        Log.d("1","Created");
+
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.d("1","onCreate");
         Context context = getApplicationContext();
         CharSequence text = "onCreate";
         int duration = Toast.LENGTH_SHORT;
-        ifRunning = true;
         Toast toast = Toast.makeText(context, text, duration);
         toast.show();
+
+        Intent intent = new Intent();
+        intent.putExtra("NotificationStatus", true);
+        intent.setAction("NotificationStatus");// for intent filter to fit different information
+        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
+        localBroadcastManager.sendBroadcast(intent);
+
     }
 
-    public void setTimer(){
-        if(timerNotificationStatus == null){
-            timerNotificationStatus = new Timer();
-            TimerTask timerTask = new TimerTask() {
-                @Override
-                public void run() {
-                    Bundle bundle = new Bundle();
-                    bundle.putBoolean("notification", ifRunning);
-                    ifRunning = false;
-                    Intent intent = new Intent();
-                    intent.putExtra("notificationStatus", bundle);
-                    intent.setAction("notification");// for intent filter to fit different information
-                    LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
-                    localBroadcastManager.sendBroadcast(intent);
-                }
-            };
-            timerNotificationStatus.schedule(timerTask,10, 5000);
-        }
-    }
+
 
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
@@ -84,7 +65,6 @@ public class NotificationService extends NotificationListenerService {
 
     private void handleGMapNotification (StatusBarNotification sbn){
         Bundle bundle = sbn.getNotification().extras;
-        Bundle broadcastBundle = new Bundle();
 
         String string = bundle.getString(Notification.EXTRA_TEXT);
         String[] strings = string.split("-");
@@ -117,7 +97,13 @@ public class NotificationService extends NotificationListenerService {
 
     }
 
-
-
-
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Intent intent = new Intent();
+        intent.putExtra("NotificationStatus", false);
+        intent.setAction("NotificationStatus");// for intent filter to fit different information
+        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
+        localBroadcastManager.sendBroadcast(intent);
+    }
 }

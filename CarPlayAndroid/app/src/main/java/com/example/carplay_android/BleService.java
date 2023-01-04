@@ -53,6 +53,11 @@ public class BleService extends Service {
     public void onCreate() {
         super.onCreate();
         setBTCheckTimer();
+        Intent intent = new Intent();
+        intent.putExtra("BleStatus", true);
+        intent.setAction("BleStatus");// for intent filter to fit different information
+        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
+        localBroadcastManager.sendBroadcast(intent);
     }
 
     public void setBTCheckTimer(){
@@ -73,8 +78,8 @@ public class BleService extends Service {
                         }
                     }
                     Intent intent = new Intent();
-                    intent.setAction("BT");
-                    intent.putExtra("BT", status);
+                    intent.setAction("BTStatus");
+                    intent.putExtra("BTStatus", status);
                     LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
                     localBroadcastManager.sendBroadcast(intent);
                 }
@@ -168,7 +173,14 @@ public class BleService extends Service {
 
     }
 
-
-
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Intent intent = new Intent();
+        intent.putExtra("BleStatus", false);
+        intent.setAction("BleStatus");// for intent filter to fit different information
+        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
+        localBroadcastManager.sendBroadcast(intent);
+    }
 }
 
