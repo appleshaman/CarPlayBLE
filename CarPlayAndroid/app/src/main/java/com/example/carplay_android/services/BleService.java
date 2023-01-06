@@ -1,34 +1,26 @@
-package com.example.carplay_android;
+package com.example.carplay_android.services;
 
 import android.app.Service;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Binder;
-import android.os.Build;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
-import android.widget.Toast;
+
 import androidx.annotation.Nullable;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 
 import com.clj.fastble.BleManager;
 import com.clj.fastble.callback.BleGattCallback;
 import com.clj.fastble.callback.BleReadCallback;
-import com.clj.fastble.callback.BleScanCallback;
 import com.clj.fastble.callback.BleWriteCallback;
 import com.clj.fastble.data.BleDevice;
 import com.clj.fastble.exception.BleException;
-import com.clj.fastble.scan.BleScanRuleConfig;
+import com.example.carplay_android.utils.BroadcastUtils;
 
-import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -53,11 +45,7 @@ public class BleService extends Service {
     public void onCreate() {
         super.onCreate();
         setBTCheckTimer();
-        Intent intent = new Intent();
-        intent.putExtra("BleStatus", true);
-        intent.setAction("BleStatus");// for intent filter to fit different information
-        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
-        localBroadcastManager.sendBroadcast(intent);
+        BroadcastUtils.sendStatus(true, "BleStatus", getApplicationContext());
     }
 
     public void setBTCheckTimer(){
@@ -77,11 +65,7 @@ public class BleService extends Service {
                             status = true;
                         }
                     }
-                    Intent intent = new Intent();
-                    intent.setAction("BTStatus");
-                    intent.putExtra("BTStatus", status);
-                    LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
-                    localBroadcastManager.sendBroadcast(intent);
+                    BroadcastUtils.sendStatus( status, "BTStatus",getApplicationContext());
                 }
             };
             timerBTState.schedule(timerTask, 10, 1000);
@@ -108,6 +92,8 @@ public class BleService extends Service {
                 @Override
                 public void onConnectSuccess(BleDevice bleDevice, BluetoothGatt gatt, int status) {
                     Log.d("s","Connect success");
+                    BroadcastUtils.sendStatus(true,"ConnectionStatus",getApplicationContext());
+
                     List<BluetoothGattService> serviceList = gatt.getServices();
                     for (BluetoothGattService service : serviceList) {
                         UUID uuid_service = service.getUuid();
@@ -167,20 +153,20 @@ public class BleService extends Service {
                 @Override
                 public void onDisConnected(boolean isActiveDisConnected, BleDevice device, BluetoothGatt gatt, int status) {
                     Log.d("s","Disconnected");
+                    BroadcastUtils.sendStatus(false,"ConnectionStatus",getApplicationContext());
+
                 }
             });
         }
 
     }
 
+
+
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Intent intent = new Intent();
-        intent.putExtra("BleStatus", false);
-        intent.setAction("BleStatus");// for intent filter to fit different information
-        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
-        localBroadcastManager.sendBroadcast(intent);
+        BroadcastUtils.sendStatus(false,"BleStatus",getApplicationContext());
     }
 }
 

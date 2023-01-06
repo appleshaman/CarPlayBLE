@@ -1,4 +1,4 @@
-package com.example.carplay_android;
+package com.example.carplay_android.utils;
 
 import android.content.Context;
 import android.content.Intent;
@@ -10,6 +10,7 @@ import com.clj.fastble.BleManager;
 import com.clj.fastble.callback.BleScanCallback;
 import com.clj.fastble.data.BleDevice;
 import com.clj.fastble.scan.BleScanRuleConfig;
+import com.example.carplay_android.JavaBeanDevice;
 
 import java.util.List;
 
@@ -41,19 +42,11 @@ public class ScanBleDeviceUtils {
             @Override
             public void onScanFinished(List<BleDevice> scanResultList) {
                 resultList = scanResultList;
-                JavaBeanDevice javaBeanDeviceList = new JavaBeanDevice();
-                javaBeanDeviceList.setBleDeviceList(resultList);
-                Intent intent = new Intent();
-                intent.setAction("DeviceList");
-                intent.putExtra("DeviceList", javaBeanDeviceList);
-                LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
-                localBroadcastManager.sendBroadcast(intent);
+                BroadcastUtils.sendBleDevices(resultList, "DeviceList", context);
             }
         });
     }
-    public static void setResultList(List<BleDevice> resultList) {
-        ScanBleDeviceUtils.resultList = resultList;
-    }
+
     public static List<BleDevice> getResultList() {
         return resultList;
     }

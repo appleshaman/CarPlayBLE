@@ -1,9 +1,8 @@
-package com.example.carplay_android;
+package com.example.carplay_android.services;
 
 
 import android.app.Notification;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.service.notification.NotificationListenerService;
@@ -12,7 +11,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import com.example.carplay_android.utils.BroadcastUtils;
 
 public class NotificationService extends NotificationListenerService {
     public NotificationService() {
@@ -27,12 +26,7 @@ public class NotificationService extends NotificationListenerService {
         int duration = Toast.LENGTH_SHORT;
         Toast toast = Toast.makeText(context, text, duration);
         toast.show();
-
-        Intent intent = new Intent();
-        intent.putExtra("NotificationStatus", true);
-        intent.setAction("NotificationStatus");// for intent filter to fit different information
-        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
-        localBroadcastManager.sendBroadcast(intent);
+        BroadcastUtils.sendStatus(true, "NotificationStatus", getApplicationContext());
 
     }
 
@@ -97,13 +91,11 @@ public class NotificationService extends NotificationListenerService {
 
     }
 
+
+
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Intent intent = new Intent();
-        intent.putExtra("NotificationStatus", false);
-        intent.setAction("NotificationStatus");// for intent filter to fit different information
-        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
-        localBroadcastManager.sendBroadcast(intent);
+        BroadcastUtils.sendStatus(false, "NotificationStatus", getApplicationContext());
     }
 }
