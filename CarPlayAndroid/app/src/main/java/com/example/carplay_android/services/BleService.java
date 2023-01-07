@@ -29,11 +29,7 @@ import java.util.UUID;
 
 public class BleService extends Service {
 
-
     private Timer timerBTState;
-    private Handler handler = new Handler();
-
-
 
     @Nullable
     @Override

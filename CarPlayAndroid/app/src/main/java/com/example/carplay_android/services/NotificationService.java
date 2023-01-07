@@ -3,6 +3,8 @@ package com.example.carplay_android.services;
 
 import android.app.Notification;
 import android.content.Context;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.service.notification.NotificationListenerService;
@@ -12,6 +14,7 @@ import android.widget.Toast;
 
 
 import com.example.carplay_android.utils.BroadcastUtils;
+import com.example.carplay_android.utils.DirectionUtils;
 
 public class NotificationService extends NotificationListenerService {
     public NotificationService() {
@@ -27,7 +30,7 @@ public class NotificationService extends NotificationListenerService {
         Toast toast = Toast.makeText(context, text, duration);
         toast.show();
         BroadcastUtils.sendStatus(true, "NotificationStatus", getApplicationContext());
-
+        DirectionUtils.loadSamplesFromAsserts(getApplicationContext());
     }
 
 
@@ -85,9 +88,10 @@ public class NotificationService extends NotificationListenerService {
         bundle.putString("Distance",strings[1]);
 
 
-        Icon largeIcon =  sbn.getNotification().getLargeIcon();
-        largeIcon = largeIcon;
-        sbn.getNotification().getSmallIcon();
+        BitmapDrawable bitmapDrawable = (BitmapDrawable) sbn.getNotification().getLargeIcon().loadDrawable(getApplicationContext());
+
+        String direction = DirectionUtils.getDirectionByComparing(bitmapDrawable.getBitmap());
+        direction = direction;
 
     }
 
