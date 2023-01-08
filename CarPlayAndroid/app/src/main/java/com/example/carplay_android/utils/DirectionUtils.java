@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -17,7 +18,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 
 public class DirectionUtils {
-    private static ArrayList<Bitmap> bitmapSamples;
     private static ArrayList<JavaBeanBitmap> bitmaps = new ArrayList<JavaBeanBitmap>();
 
     public static void loadSamplesFromAsserts(Context context) {
@@ -30,7 +30,7 @@ public class DirectionUtils {
         }
         for (String sample : samples) {
             JavaBeanBitmap javaBeanBitmap = new JavaBeanBitmap();
-            javaBeanBitmap.setBitmapName(sample);
+            javaBeanBitmap.setBitmapName(sample.split("\\.")[0]);
             String path = "direction_samples" + File.separator + sample;
             javaBeanBitmap.setBitmapDir(path);
             try {
@@ -46,11 +46,13 @@ public class DirectionUtils {
     private static float compareBitmaps(Bitmap bitmap1, Bitmap bitmap2) {
         int[] ints1 = new int[14400];
         int[] ints2 = new int[14400];
+        Log.d("ok", "ok1");
         bitmap1.getPixels(ints1, 0, 120, 0, 0, 120, 120);
         bitmap2.getPixels(ints2, 0, 120, 0, 0, 120, 120);
+        Log.d("ok", "ok");
         int i1 = 0;
         int i2 = 0;
-        while (i2 < 14399) {
+        while (i2 < 14400) {
             if (ints1[i2] != ints2[i2]) {
                 i1++;
             }
@@ -59,18 +61,22 @@ public class DirectionUtils {
         return (float) i1 / (float) 14400 * (float) 100;
     }
 
-    public static String getDirectionByComparing(@NotNull Bitmap bitmap) {
-        bitmap = Bitmap.createScaledBitmap(bitmap, 120, 120, false);
+    public static String getDirectionByComparing(@NotNull Bitmap bitmapBeCompared) {
+
+
         int result = -1;
         int index = -1;
         for (int i = 0; i < bitmaps.size(); i++) {
-            float resultTemp = compareBitmaps(bitmaps.get(i).getSampleBitmap(), bitmap);
+            Bitmap bitmapToCompared;
+            bitmapBeCompared = Bitmap.createScaledBitmap(bitmapBeCompared, 120, 120, false);
+            bitmapToCompared = Bitmap.createScaledBitmap(bitmaps.get(i).getSampleBitmap(), 120, 120, false);
+            float resultTemp = compareBitmaps(bitmapToCompared, bitmapBeCompared);
             if (result == -1 || ((Float.compare(resultTemp, ((float) result)) < 0))) {
                 result = (int) resultTemp;
                 index = i;
             }
         }
-        if (index == -1) {
+        if (index != -1) {
             if (result <= 35) {
                 return bitmaps.get(index).getBitmapName();
             }
