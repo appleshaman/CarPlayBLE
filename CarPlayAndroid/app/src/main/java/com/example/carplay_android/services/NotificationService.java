@@ -85,7 +85,7 @@ public class NotificationService extends NotificationListenerService {
 
         string = bundle.getString(Notification. EXTRA_SUB_TEXT);
         strings = string.split("·");
-        informationMessage = informationMessage + strings[0] + "$" + strings[1] + "$";// ETA in Minutes + Distance
+        informationMessage = informationMessage + strings[0].trim() + "$" + strings[1].trim() + "$";// ETA in Minutes + Distance
 
         informationMessage = informationMessage;
 
