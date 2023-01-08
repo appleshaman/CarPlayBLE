@@ -62,31 +62,32 @@ public class NotificationService extends NotificationListenerService {
 
     private void handleGMapNotification (StatusBarNotification sbn){
         Bundle bundle = sbn.getNotification().extras;
-
+        String informationMessage;
         String string = bundle.getString(Notification.EXTRA_TEXT);
-        String[] strings = string.split("-");
-        bundle.putString("destination",strings[0]);
-        strings = strings[1].split(" ");
+        String[] strings = string.split("-");//destination
+        informationMessage = strings[0].trim() + "$";
+        strings = strings[1].trim().split(" ");
         if(strings.length == 3){
-            strings[0] = strings[0].concat(" ");//concat a " "
-            strings[0] = strings[0].concat(strings[1]);//if use 12 hour type, then concat the time and AM/PM
+            strings[0] = strings[0] + " ";//concat a " "
+            strings[0] = strings[0] + strings[1];//if use 12 hour type, then concat the time and AM/PM
         }
-        bundle.putString("ETA",strings[1]);
+        informationMessage = informationMessage + strings[0] + "$";// get the ETA
 
         string = bundle.getString(Notification.EXTRA_TITLE);
         strings = string.split("-");
         if(strings.length  == 2){
-            bundle.putString("Direction",strings[1]);
+            informationMessage = informationMessage + strings[0].trim() + "$"  + strings[1].trim() + "$";//time to next direction + Direction to somewhere
         }
         else if(strings.length  == 1){
+            informationMessage = informationMessage + strings[0] + "$";//Direction to somewhere
             bundle.putString("Direction",strings[0]);
         }
 
         string = bundle.getString(Notification. EXTRA_SUB_TEXT);
         strings = string.split("·");
-        bundle.putString("Minutes",strings[0]);
-        bundle.putString("Distance",strings[1]);
+        informationMessage = informationMessage + strings[0] + "$" + strings[1] + "$";// ETA in Minutes + Distance
 
+        informationMessage = informationMessage;
 
         BitmapDrawable bitmapDrawable = (BitmapDrawable) sbn.getNotification().getLargeIcon().loadDrawable(getApplicationContext());
 

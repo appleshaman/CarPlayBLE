@@ -32,7 +32,6 @@ public class DirectionUtils {
             JavaBeanBitmap javaBeanBitmap = new JavaBeanBitmap();
             javaBeanBitmap.setBitmapName(sample.split("\\.")[0]);
             String path = "direction_samples" + File.separator + sample;
-            javaBeanBitmap.setBitmapDir(path);
             try {
                 InputStream inputStream = context.getAssets().open(path);
                 javaBeanBitmap.setSampleBitmap(BitmapFactory.decodeStream(inputStream));
@@ -62,15 +61,13 @@ public class DirectionUtils {
     }
 
     public static String getDirectionByComparing(@NotNull Bitmap bitmapBeCompared) {
-
-
         int result = -1;
         int index = -1;
         for (int i = 0; i < bitmaps.size(); i++) {
-            Bitmap bitmapToCompared;
+            Bitmap bitmapComparedWith;
             bitmapBeCompared = Bitmap.createScaledBitmap(bitmapBeCompared, 120, 120, false);
-            bitmapToCompared = Bitmap.createScaledBitmap(bitmaps.get(i).getSampleBitmap(), 120, 120, false);
-            float resultTemp = compareBitmaps(bitmapToCompared, bitmapBeCompared);
+            bitmapComparedWith = Bitmap.createScaledBitmap(bitmaps.get(i).getSampleBitmap(), 120, 120, false);
+            float resultTemp = compareBitmaps(bitmapComparedWith, bitmapBeCompared);
             if (result == -1 || ((Float.compare(resultTemp, ((float) result)) < 0))) {
                 result = (int) resultTemp;
                 index = i;
