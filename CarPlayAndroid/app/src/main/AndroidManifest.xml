@@ -30,11 +30,11 @@
             android:exported="false" />
 
         <service
-            android:name=".BleService"
+            android:name=".services.BleService"
             android:enabled="true"
             android:exported="true"></service>
         <service
-            android:name=".NotificationService"
+            android:name=".services.NotificationService"
             android:enabled="true"
             android:exported="true"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">

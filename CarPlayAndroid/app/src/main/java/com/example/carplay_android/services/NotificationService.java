@@ -1,9 +1,10 @@
-package com.example.carplay_android;
+package com.example.carplay_android.services;
 
 
 import android.app.Notification;
 import android.content.Context;
-import android.content.Intent;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.service.notification.NotificationListenerService;
@@ -11,51 +12,28 @@ import android.service.notification.StatusBarNotification;
 import android.util.Log;
 import android.widget.Toast;
 
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import com.clj.fastble.BleManager;
-
-import java.util.Timer;
-import java.util.TimerTask;
+import com.example.carplay_android.utils.BroadcastUtils;
+import com.example.carplay_android.utils.DirectionUtils;
 
 public class NotificationService extends NotificationListenerService {
-    private Timer timerNotificationStatus;
-    private boolean ifRunning = false;
     public NotificationService() {
-        Log.d("1","Created");
+
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.d("1","onCreate");
         Context context = getApplicationContext();
         CharSequence text = "onCreate";
         int duration = Toast.LENGTH_SHORT;
-        ifRunning = true;
         Toast toast = Toast.makeText(context, text, duration);
         toast.show();
+        BroadcastUtils.sendStatus(true, "NotificationStatus", getApplicationContext());
+        DirectionUtils.loadSamplesFromAsserts(getApplicationContext());
     }
 
-    public void setTimer(){
-        if(timerNotificationStatus == null){
-            timerNotificationStatus = new Timer();
-            TimerTask timerTask = new TimerTask() {
-                @Override
-                public void run() {
-                    Bundle bundle = new Bundle();
-                    bundle.putBoolean("notification", ifRunning);
-                    ifRunning = false;
-                    Intent intent = new Intent();
-                    intent.putExtra("notificationStatus", bundle);
-                    intent.setAction("notification");// for intent filter to fit different information
-                    LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
-                    localBroadcastManager.sendBroadcast(intent);
-                }
-            };
-            timerNotificationStatus.schedule(timerTask,10, 5000);
-        }
-    }
+
 
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
@@ -84,7 +62,6 @@ public class NotificationService extends NotificationListenerService {
 
     private void handleGMapNotification (StatusBarNotification sbn){
         Bundle bundle = sbn.getNotification().extras;
-        Bundle broadcastBundle = new Bundle();
 
         String string = bundle.getString(Notification.EXTRA_TEXT);
         String[] strings = string.split("-");
@@ -111,13 +88,18 @@ public class NotificationService extends NotificationListenerService {
         bundle.putString("Distance",strings[1]);
 
 
-        Icon largeIcon =  sbn.getNotification().getLargeIcon();
-        largeIcon = largeIcon;
-        sbn.getNotification().getSmallIcon();
+        BitmapDrawable bitmapDrawable = (BitmapDrawable) sbn.getNotification().getLargeIcon().loadDrawable(getApplicationContext());
+
+        String direction = DirectionUtils.getDirectionByComparing(bitmapDrawable.getBitmap());
+        direction = direction;
 
     }
 
 
 
-
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        BroadcastUtils.sendStatus(false, "NotificationStatus", getApplicationContext());
+    }
 }
