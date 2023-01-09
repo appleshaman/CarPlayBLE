@@ -32,9 +32,7 @@ import java.lang.reflect.Type;
 public class MainActivity extends AppCompatActivity {
 
     private BleService.BleBinder controlBle;
-    private BleService bleService;
-    private MyServiceConn myServiceConn;
-    private Intent intent;
+    private MyServiceConn serviceConnToNotification;
 
     private Button buttonOpenNotification;
     private Button buttonScanNewDevice;
@@ -83,14 +81,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
-
-
-
-
-
-
-
     }
 
     private void init(){
@@ -119,8 +109,6 @@ public class MainActivity extends AppCompatActivity {
             deviceUsed = javaBeanDevice.getBleDevice();
             deviceName.setText(deviceUsed.getName());
         }
-
-
     }
 
     private void askPermission(){
@@ -159,9 +147,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initService(){
-        myServiceConn = new MyServiceConn();
-        intent = new Intent(this, BleService.class);
-        bindService(intent, myServiceConn, BIND_AUTO_CREATE);
+        serviceConnToNotification = new MyServiceConn();
+        Intent intent = new Intent(this, BleService.class);
+        bindService(intent, serviceConnToNotification, BIND_AUTO_CREATE);
         startService(intent);//bind the service
     }
 
@@ -169,7 +157,6 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onServiceConnected(ComponentName name, IBinder iBinder){
             controlBle = (BleService.BleBinder)iBinder;
-            bleService = controlBle.getService();
         }
         @Override
         public void onServiceDisconnected(ComponentName name){
@@ -241,7 +228,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unbindService(myServiceConn);
+        unbindService(serviceConnToNotification);
     }
 }
 

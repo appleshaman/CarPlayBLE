@@ -36,14 +36,8 @@ public class BleScanPage extends AppCompatActivity {
 
     private LeDeviceListAdapter leDeviceListAdapter = new LeDeviceListAdapter(this);
 
-    private ReceiverForScanning receiverForScanning;
-    private LocalBroadcastManager localBroadcastManagerForScanning;
-    private IntentFilter intentFilterForScanning;
-
     private BleService.BleBinder controlBle;
-    private BleService bleService;
-    private MyServiceConn myServiceConn;
-    private Intent intent;
+    private MyServiceConn serviceConnBle;
 
     private BleDevice deviceSelected;
 
@@ -101,16 +95,16 @@ public class BleScanPage extends AppCompatActivity {
     }
 
     private void initBroadcastReceiver(){
-        localBroadcastManagerForScanning = LocalBroadcastManager.getInstance(getApplicationContext());
-        receiverForScanning = new ReceiverForScanning();
-        intentFilterForScanning = new IntentFilter("DeviceList");
+        LocalBroadcastManager localBroadcastManagerForScanning = LocalBroadcastManager.getInstance(getApplicationContext());
+        ReceiverForScanning receiverForScanning = new ReceiverForScanning();
+        IntentFilter intentFilterForScanning = new IntentFilter("DeviceList");
         localBroadcastManagerForScanning.registerReceiver(receiverForScanning, intentFilterForScanning);
     }
 
     private void initService(){
-        myServiceConn = new MyServiceConn();
-        intent = new Intent(this, BleService.class);
-        bindService(intent, myServiceConn, BIND_AUTO_CREATE);
+        serviceConnBle = new MyServiceConn();
+        Intent intent = new Intent(this, BleService.class);
+        bindService(intent, serviceConnBle, BIND_AUTO_CREATE);
         startService(intent);//bind the service
     }
 
@@ -130,7 +124,6 @@ public class BleScanPage extends AppCompatActivity {
         @Override
         public void onServiceConnected(ComponentName name, IBinder iBinder){
             controlBle = (BleService.BleBinder)iBinder;
-            bleService = controlBle.getService();
         }
         @Override
         public void onServiceDisconnected(ComponentName name){
@@ -148,7 +141,7 @@ public class BleScanPage extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unbindService(myServiceConn);
+        unbindService(serviceConnBle);
     }
 }
 

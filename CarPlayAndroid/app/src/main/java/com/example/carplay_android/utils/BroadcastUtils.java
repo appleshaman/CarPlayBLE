@@ -15,10 +15,6 @@ public class BroadcastUtils {
         sendBroadcast(status, filter, context);
     }
 
-    public static void sendString(String string, String filter, Context context) {
-        sendBroadcast(string, filter, context);
-    }
-
     public static void sendBleDevice(BleDevice bleDevice, String filter, Context context) {
         sendBroadcast(bleDevice, filter, context);
     }
@@ -30,9 +26,7 @@ public class BroadcastUtils {
     public static void sendBroadcast(Object object, String filter, Context context) {
         Intent intent = new Intent();
         intent.setAction(filter);
-        if (object instanceof String) {
-            intent.putExtra(filter, (String) object);
-        } else if (object instanceof Boolean) {
+        if (object instanceof Boolean) {
             intent.putExtra(filter, (Boolean) object);
         } else if ((object instanceof BleDevice) || (object instanceof List)) {
             JavaBeanDevice javaBeanDevice = new JavaBeanDevice();

@@ -30,14 +30,14 @@ import com.example.carplay_android.utils.ScanBleDeviceUtils;
 public class NotificationService extends NotificationListenerService {
 
     private BleService.BleBinder controlBle;
-    private BleService bleService;
-    private MyServiceConn myServiceConn;
-    private Intent intent;
+    private MyServiceConn serviceConnToBle;
     private Boolean deviceStatus = false;
 
     private LocalBroadcastManager localBroadcastManager;
     private ReceiverForDeviceStatus receiverForDeviceStatus;
     private IntentFilter intentFilterForDeviceStatus;
+
+    private String filterForNotificationStatus = "NotificationStatus";
 
     public NotificationService() {
 
@@ -47,7 +47,7 @@ public class NotificationService extends NotificationListenerService {
     public void onCreate() {
         super.onCreate();
         init();
-        BroadcastUtils.sendStatus(true, "NotificationStatus", getApplicationContext());
+        BroadcastUtils.sendStatus(true, filterForNotificationStatus, getApplicationContext());
         DirectionUtils.loadSamplesFromAsserts(getApplicationContext());
     }
 
@@ -108,7 +108,7 @@ public class NotificationService extends NotificationListenerService {
 
         informationMessage = informationMessage + DirectionUtils.getDirectionByComparing(bitmapDrawable.getBitmap());
         if(deviceStatus){
-            BroadcastUtils.sendString(informationMessage, "informationMessage", getApplicationContext());
+            controlBle.sendToDevice(informationMessage);
         }
     }
 
@@ -118,16 +118,16 @@ public class NotificationService extends NotificationListenerService {
     }
 
     private void initService(){
-        myServiceConn = new MyServiceConn();
-        intent = new Intent(this, BleService.class);
-        bindService(intent, myServiceConn, BIND_AUTO_CREATE);
+        serviceConnToBle = new MyServiceConn();
+        Intent intent = new Intent(this, BleService.class);
+        bindService(intent, serviceConnToBle, BIND_AUTO_CREATE);
         startService(intent);//bind the service
     }
 
     private void initBroadcastReceiver(){
         localBroadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
         receiverForDeviceStatus = new ReceiverForDeviceStatus();
-        intentFilterForDeviceStatus = new IntentFilter("DeviceList");
+        intentFilterForDeviceStatus = new IntentFilter("DeviceStatus");
         localBroadcastManager.registerReceiver(receiverForDeviceStatus, intentFilterForDeviceStatus);
     }
 
@@ -135,7 +135,6 @@ public class NotificationService extends NotificationListenerService {
         @Override
         public void onServiceConnected(ComponentName name, IBinder iBinder){
             controlBle = (BleService.BleBinder)iBinder;
-            bleService = controlBle.getService();
         }
         @Override
         public void onServiceDisconnected(ComponentName name){
@@ -153,5 +152,6 @@ public class NotificationService extends NotificationListenerService {
     public void onDestroy() {
         super.onDestroy();
         BroadcastUtils.sendStatus(false, "NotificationStatus", getApplicationContext());
+        unbindService(serviceConnToBle);
     }
 }
