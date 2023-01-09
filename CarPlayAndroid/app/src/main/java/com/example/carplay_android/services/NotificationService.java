@@ -56,7 +56,6 @@ public class NotificationService extends NotificationListenerService {
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
         super.onNotificationPosted(sbn);
-        Log.d("!","Posted");
         if (sbn != null && isGMapNotification(sbn)){
             handleGMapNotification(sbn);
         }
@@ -65,7 +64,7 @@ public class NotificationService extends NotificationListenerService {
     @Override
     public void onNotificationRemoved(StatusBarNotification sbn) {
         super.onNotificationRemoved(sbn);
-        Log.d("!","removed");
+        Log.d("Notification","removed");
     }
 
 
@@ -108,7 +107,9 @@ public class NotificationService extends NotificationListenerService {
         BitmapDrawable bitmapDrawable = (BitmapDrawable) sbn.getNotification().getLargeIcon().loadDrawable(getApplicationContext());
 
         informationMessage = informationMessage + DirectionUtils.getDirectionByComparing(bitmapDrawable.getBitmap());
-
+        if(deviceStatus){
+            BroadcastUtils.sendString(informationMessage, "informationMessage", getApplicationContext());
+        }
     }
 
     private void init(){

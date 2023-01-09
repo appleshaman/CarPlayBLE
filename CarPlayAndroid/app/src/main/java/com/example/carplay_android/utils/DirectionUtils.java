@@ -45,10 +45,8 @@ public class DirectionUtils {
     private static float compareBitmaps(Bitmap bitmap1, Bitmap bitmap2) {
         int[] ints1 = new int[14400];
         int[] ints2 = new int[14400];
-        Log.d("ok", "ok1");
         bitmap1.getPixels(ints1, 0, 120, 0, 0, 120, 120);
         bitmap2.getPixels(ints2, 0, 120, 0, 0, 120, 120);
-        Log.d("ok", "ok");
         int i1 = 0;
         int i2 = 0;
         while (i2 < 14400) {

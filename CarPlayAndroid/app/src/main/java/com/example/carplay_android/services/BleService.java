@@ -61,7 +61,7 @@ public class BleService extends Service {
                             status = true;
                         }
                     }
-                    BroadcastUtils.sendStatus(status, "BTStatus",getApplicationContext());
+                    BroadcastUtils.sendStatus( status, "BTStatus",getApplicationContext());
                 }
             };
             timerBTState.schedule(timerTask, 10, 1000);
@@ -155,9 +155,7 @@ public class BleService extends Service {
             });
         }
 
-        public void sendToDevice(String informationMessage){
-
-        }
+        public void sendToDevice(String informationMessage){}
     }
 
 
