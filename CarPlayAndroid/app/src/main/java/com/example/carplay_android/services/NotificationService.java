@@ -2,21 +2,43 @@ package com.example.carplay_android.services;
 
 
 import android.app.Notification;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
 import android.widget.Toast;
 
 
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
+import com.example.carplay_android.BleScanPage;
 import com.example.carplay_android.utils.BroadcastUtils;
 import com.example.carplay_android.utils.DirectionUtils;
+import com.example.carplay_android.utils.ScanBleDeviceUtils;
 
 public class NotificationService extends NotificationListenerService {
+
+    private BleService.BleBinder controlBle;
+    private BleService bleService;
+    private MyServiceConn myServiceConn;
+    private Intent intent;
+    private Boolean deviceStatus = false;
+
+    private LocalBroadcastManager localBroadcastManager;
+    private ReceiverForDeviceStatus receiverForDeviceStatus;
+    private IntentFilter intentFilterForDeviceStatus;
+
     public NotificationService() {
 
     }
@@ -24,11 +46,7 @@ public class NotificationService extends NotificationListenerService {
     @Override
     public void onCreate() {
         super.onCreate();
-        Context context = getApplicationContext();
-        CharSequence text = "onCreate";
-        int duration = Toast.LENGTH_SHORT;
-        Toast toast = Toast.makeText(context, text, duration);
-        toast.show();
+        init();
         BroadcastUtils.sendStatus(true, "NotificationStatus", getApplicationContext());
         DirectionUtils.loadSamplesFromAsserts(getApplicationContext());
     }
@@ -87,16 +105,48 @@ public class NotificationService extends NotificationListenerService {
         strings = string.split("·");
         informationMessage = informationMessage + strings[0].trim() + "$" + strings[1].trim() + "$";// ETA in Minutes + Distance
 
-        informationMessage = informationMessage;
-
         BitmapDrawable bitmapDrawable = (BitmapDrawable) sbn.getNotification().getLargeIcon().loadDrawable(getApplicationContext());
 
-        String direction = DirectionUtils.getDirectionByComparing(bitmapDrawable.getBitmap());
-        direction = direction;
+        informationMessage = informationMessage + DirectionUtils.getDirectionByComparing(bitmapDrawable.getBitmap());
 
     }
 
+    private void init(){
+        initService();
+        initBroadcastReceiver();
+    }
 
+    private void initService(){
+        myServiceConn = new MyServiceConn();
+        intent = new Intent(this, BleService.class);
+        bindService(intent, myServiceConn, BIND_AUTO_CREATE);
+        startService(intent);//bind the service
+    }
+
+    private void initBroadcastReceiver(){
+        localBroadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
+        receiverForDeviceStatus = new ReceiverForDeviceStatus();
+        intentFilterForDeviceStatus = new IntentFilter("DeviceList");
+        localBroadcastManager.registerReceiver(receiverForDeviceStatus, intentFilterForDeviceStatus);
+    }
+
+    private class MyServiceConn implements ServiceConnection {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder iBinder){
+            controlBle = (BleService.BleBinder)iBinder;
+            bleService = controlBle.getService();
+        }
+        @Override
+        public void onServiceDisconnected(ComponentName name){
+        }
+    }
+
+    private class ReceiverForDeviceStatus extends BroadcastReceiver{
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            deviceStatus = intent.getBooleanExtra("DeviceStatus", false);
+        }
+    }
 
     @Override
     public void onDestroy() {

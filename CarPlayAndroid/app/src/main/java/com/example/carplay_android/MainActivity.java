@@ -135,32 +135,27 @@ public class MainActivity extends AppCompatActivity {
 
     private void initBroadcastReceiver(){
         IntentFilter intentFilter;
+        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
 
         intentFilter = new IntentFilter("DeviceUsed");
-        LocalBroadcastManager localBroadcastManagerForDeviceUsed = LocalBroadcastManager.getInstance(getApplicationContext());
         ReceiverForDeviceUsed receiverForDeviceUsed = new ReceiverForDeviceUsed();
-        localBroadcastManagerForDeviceUsed.registerReceiver(receiverForDeviceUsed, intentFilter);
+        localBroadcastManager.registerReceiver(receiverForDeviceUsed, intentFilter);
 
         intentFilter = new IntentFilter("BTStatus");
-        LocalBroadcastManager localBroadcastManagerForBTStatus = LocalBroadcastManager.getInstance(getApplicationContext());
         ReceiverForBTStatus receiverForBTStatus = new ReceiverForBTStatus();
-        localBroadcastManagerForBTStatus.registerReceiver(receiverForBTStatus, intentFilter);
+        localBroadcastManager.registerReceiver(receiverForBTStatus, intentFilter);
 
         intentFilter = new IntentFilter("BleStatus");
-        LocalBroadcastManager localBroadcastManagerForBleStatus = LocalBroadcastManager.getInstance(getApplicationContext());
         ReceiverForBleStatus receiverForBleStatus = new ReceiverForBleStatus();
-        localBroadcastManagerForBleStatus.registerReceiver(receiverForBleStatus, intentFilter);
+        localBroadcastManager.registerReceiver(receiverForBleStatus, intentFilter);
 
         intentFilter = new IntentFilter("NotificationStatus");
-        LocalBroadcastManager localBroadcastManagerForNotificationStatus = LocalBroadcastManager.getInstance(getApplicationContext());
         ReceiverForNotificationStatus receiverForNotificationStatus = new ReceiverForNotificationStatus();
-        localBroadcastManagerForNotificationStatus.registerReceiver(receiverForNotificationStatus, intentFilter);
+        localBroadcastManager.registerReceiver(receiverForNotificationStatus, intentFilter);
 
         intentFilter = new IntentFilter("DeviceStatus");
-        LocalBroadcastManager localBroadcastManagerForDeviceStatus = LocalBroadcastManager.getInstance(getApplicationContext());
         ReceiverForDeviceUsed receiverForDeviceStatus = new ReceiverForDeviceUsed();
-        localBroadcastManagerForDeviceStatus.registerReceiver(receiverForDeviceStatus, intentFilter);
-
+        localBroadcastManager.registerReceiver(receiverForDeviceStatus, intentFilter);
     }
 
     private void initService(){
