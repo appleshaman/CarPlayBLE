@@ -1,4 +1,4 @@
-package com.example.carplay_android;
+package com.example.carplay_android.javabeans;
 
 import android.graphics.Bitmap;
 

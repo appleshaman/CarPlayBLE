@@ -6,7 +6,7 @@ import android.content.Intent;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.clj.fastble.data.BleDevice;
-import com.example.carplay_android.JavaBeanDevice;
+import com.example.carplay_android.javabeans.JavaBeanDevice;
 
 import java.util.List;
 

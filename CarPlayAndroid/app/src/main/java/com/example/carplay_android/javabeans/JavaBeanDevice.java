@@ -1,4 +1,4 @@
-package com.example.carplay_android;
+package com.example.carplay_android.javabeans;
 
 import android.content.Context;
 import android.content.Intent;

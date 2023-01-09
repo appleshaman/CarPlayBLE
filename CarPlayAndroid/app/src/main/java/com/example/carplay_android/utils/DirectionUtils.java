@@ -4,11 +4,8 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.util.Log;
 
-import androidx.annotation.NonNull;
-
-import com.example.carplay_android.JavaBeanBitmap;
+import com.example.carplay_android.javabeans.JavaBeanBitmap;
 
 import org.jetbrains.annotations.NotNull;
 

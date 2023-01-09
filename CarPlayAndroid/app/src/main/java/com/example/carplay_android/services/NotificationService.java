@@ -1,5 +1,6 @@
 package com.example.carplay_android.services;
 
+import static com.example.carplay_android.javabeans.JavaBeanFilters.*;
 
 import android.app.Notification;
 import android.content.BroadcastReceiver;
@@ -8,24 +9,18 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
-import android.widget.Toast;
-
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import com.example.carplay_android.BleScanPage;
 import com.example.carplay_android.utils.BroadcastUtils;
 import com.example.carplay_android.utils.DirectionUtils;
-import com.example.carplay_android.utils.ScanBleDeviceUtils;
+
 
 public class NotificationService extends NotificationListenerService {
 
@@ -33,11 +28,6 @@ public class NotificationService extends NotificationListenerService {
     private MyServiceConn serviceConnToBle;
     private Boolean deviceStatus = false;
 
-    private LocalBroadcastManager localBroadcastManager;
-    private ReceiverForDeviceStatus receiverForDeviceStatus;
-    private IntentFilter intentFilterForDeviceStatus;
-
-    private String filterForNotificationStatus = "NotificationStatus";
 
     public NotificationService() {
 
@@ -47,7 +37,7 @@ public class NotificationService extends NotificationListenerService {
     public void onCreate() {
         super.onCreate();
         init();
-        BroadcastUtils.sendStatus(true, filterForNotificationStatus, getApplicationContext());
+        BroadcastUtils.sendStatus(true, getFILTER_NOTIFICATION_STATUS(), getApplicationContext());
         DirectionUtils.loadSamplesFromAsserts(getApplicationContext());
     }
 
@@ -125,9 +115,9 @@ public class NotificationService extends NotificationListenerService {
     }
 
     private void initBroadcastReceiver(){
-        localBroadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
-        receiverForDeviceStatus = new ReceiverForDeviceStatus();
-        intentFilterForDeviceStatus = new IntentFilter("DeviceStatus");
+        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
+        ReceiverForDeviceStatus receiverForDeviceStatus = new ReceiverForDeviceStatus();
+        IntentFilter intentFilterForDeviceStatus = new IntentFilter(getFILTER_DEVICE_STATUS());
         localBroadcastManager.registerReceiver(receiverForDeviceStatus, intentFilterForDeviceStatus);
     }
 
@@ -144,14 +134,14 @@ public class NotificationService extends NotificationListenerService {
     private class ReceiverForDeviceStatus extends BroadcastReceiver{
         @Override
         public void onReceive(Context context, Intent intent) {
-            deviceStatus = intent.getBooleanExtra("DeviceStatus", false);
+            deviceStatus = intent.getBooleanExtra(getFILTER_DEVICE_STATUS(), false);
         }
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        BroadcastUtils.sendStatus(false, "NotificationStatus", getApplicationContext());
+        BroadcastUtils.sendStatus(false, getFILTER_NOTIFICATION_STATUS(), getApplicationContext());
         unbindService(serviceConnToBle);
     }
 }

@@ -1,5 +1,7 @@
 package com.example.carplay_android;
 
+import static com.example.carplay_android.javabeans.JavaBeanFilters.*;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
@@ -22,6 +24,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.clj.fastble.data.BleDevice;
+import com.example.carplay_android.javabeans.JavaBeanDevice;
 import com.example.carplay_android.services.BleService;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -44,6 +47,8 @@ public class MainActivity extends AppCompatActivity {
     private TextView deviceName;
 
     private BleDevice deviceUsed;
+
+
 
 
     @Override
@@ -100,8 +105,8 @@ public class MainActivity extends AppCompatActivity {
         imageViewDeviceStatus = findViewById(R.id.imageViewDevice);
         deviceName = findViewById(R.id.textViewDeviceName);
 
-        SharedPreferences sharedPreferences = getSharedPreferences("DeviceUsed", 0);
-        String json = sharedPreferences.getString("DeviceUsed", null);
+        SharedPreferences sharedPreferences = getSharedPreferences(getFILTER_DEVICE_USED(), 0);
+        String json = sharedPreferences.getString(getFILTER_DEVICE_USED(), null);
         if(json != null){
             Gson gson = new Gson();
             Type type = new TypeToken<JavaBeanDevice>(){}.getType();
@@ -125,23 +130,23 @@ public class MainActivity extends AppCompatActivity {
         IntentFilter intentFilter;
         LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
 
-        intentFilter = new IntentFilter("DeviceUsed");
+        intentFilter = new IntentFilter(getFILTER_DEVICE_USED());
         ReceiverForDeviceUsed receiverForDeviceUsed = new ReceiverForDeviceUsed();
         localBroadcastManager.registerReceiver(receiverForDeviceUsed, intentFilter);
 
-        intentFilter = new IntentFilter("BTStatus");
+        intentFilter = new IntentFilter(getFILTER_BT_STATUS());
         ReceiverForBTStatus receiverForBTStatus = new ReceiverForBTStatus();
         localBroadcastManager.registerReceiver(receiverForBTStatus, intentFilter);
 
-        intentFilter = new IntentFilter("BleStatus");
+        intentFilter = new IntentFilter(getFILTER_BLE_STATUS());
         ReceiverForBleStatus receiverForBleStatus = new ReceiverForBleStatus();
         localBroadcastManager.registerReceiver(receiverForBleStatus, intentFilter);
 
-        intentFilter = new IntentFilter("NotificationStatus");
+        intentFilter = new IntentFilter(getFILTER_NOTIFICATION_STATUS());
         ReceiverForNotificationStatus receiverForNotificationStatus = new ReceiverForNotificationStatus();
         localBroadcastManager.registerReceiver(receiverForNotificationStatus, intentFilter);
 
-        intentFilter = new IntentFilter("DeviceStatus");
+        intentFilter = new IntentFilter(getFILTER_DEVICE_STATUS());
         ReceiverForDeviceUsed receiverForDeviceStatus = new ReceiverForDeviceUsed();
         localBroadcastManager.registerReceiver(receiverForDeviceStatus, intentFilter);
     }
@@ -168,14 +173,14 @@ public class MainActivity extends AppCompatActivity {
     class ReceiverForDeviceUsed extends BroadcastReceiver{
         @Override
         public void onReceive(Context context, Intent intent) {
-            JavaBeanDevice javaBeanDevice = (JavaBeanDevice) intent.getSerializableExtra("DeviceUsed");
+            JavaBeanDevice javaBeanDevice = (JavaBeanDevice) intent.getSerializableExtra(getFILTER_DEVICE_USED());
             deviceUsed = javaBeanDevice.getBleDevice();
             deviceName.setText(deviceUsed.getName());
-            SharedPreferences sharedPreferences = getSharedPreferences("DeviceUsed", 0);
+            SharedPreferences sharedPreferences = getSharedPreferences(getFILTER_DEVICE_USED(), 0);
             SharedPreferences.Editor editor = sharedPreferences.edit();
             Gson gson = new Gson();
             String json = gson.toJson(javaBeanDevice);
-            editor.putString("DeviceUsed", json);
+            editor.putString(getFILTER_DEVICE_USED(), json);
             editor.apply();
 
         }
@@ -184,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
     class ReceiverForBTStatus extends BroadcastReceiver{
         @Override
         public void onReceive(Context context, Intent intent) {
-            if(intent.getBooleanExtra("BTStatus",false)){
+            if(intent.getBooleanExtra(getFILTER_BT_STATUS(),false)){
                 imageViewBTStatus.setColorFilter(Color.GREEN);
             }else{
                 imageViewBTStatus.setColorFilter(0x9c9c9c);
@@ -195,7 +200,7 @@ public class MainActivity extends AppCompatActivity {
     class ReceiverForBleStatus extends BroadcastReceiver{
         @Override
         public void onReceive(Context context, Intent intent) {
-            if(intent.getBooleanExtra("BleStatus",false)){
+            if(intent.getBooleanExtra(getFILTER_BLE_STATUS(),false)){
                 imageViewBleStatus.setColorFilter(Color.GREEN);
             }else{
                 imageViewBleStatus.setColorFilter(0x9c9c9c);
@@ -206,7 +211,7 @@ public class MainActivity extends AppCompatActivity {
     class ReceiverForNotificationStatus extends BroadcastReceiver{
         @Override
         public void onReceive(Context context, Intent intent) {
-            if(intent.getBooleanExtra("NotificationStatus",false)){
+            if(intent.getBooleanExtra(getFILTER_NOTIFICATION_STATUS(),false)){
                 imageViewNotificationStatus.setColorFilter(Color.GREEN);
             }else{
                 imageViewNotificationStatus.setColorFilter(0x9c9c9c);
@@ -217,7 +222,7 @@ public class MainActivity extends AppCompatActivity {
     class ReceiverForDeviceStatus extends BroadcastReceiver{
         @Override
         public void onReceive(Context context, Intent intent) {
-            if(intent.getBooleanExtra("DeviceStatus",false)){
+            if(intent.getBooleanExtra(getFILTER_DEVICE_STATUS(),false)){
                 imageViewDeviceStatus.setColorFilter(Color.GREEN);
             }else{
                 imageViewDeviceStatus.setColorFilter(0x9c9c9c);

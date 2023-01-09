@@ -1,12 +1,13 @@
 package com.example.carplay_android.services;
 
+import static com.example.carplay_android.javabeans.JavaBeanFilters.*;
+
 import android.app.Service;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.content.Intent;
 import android.os.Binder;
-import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -41,7 +42,7 @@ public class BleService extends Service {
     public void onCreate() {
         super.onCreate();
         setBTCheckTimer();
-        BroadcastUtils.sendStatus(true, "BleStatus", getApplicationContext());
+        BroadcastUtils.sendStatus(true, getFILTER_BLE_STATUS(), getApplicationContext());
     }
 
     public void setBTCheckTimer(){
@@ -61,7 +62,7 @@ public class BleService extends Service {
                             status = true;
                         }
                     }
-                    BroadcastUtils.sendStatus( status, "BTStatus",getApplicationContext());
+                    BroadcastUtils.sendStatus( status, getFILTER_BT_STATUS(), getApplicationContext());
                 }
             };
             timerBTState.schedule(timerTask, 10, 1000);
@@ -88,7 +89,7 @@ public class BleService extends Service {
                 @Override
                 public void onConnectSuccess(BleDevice bleDevice, BluetoothGatt gatt, int status) {
                     Log.d("s","Connect success");
-                    BroadcastUtils.sendStatus(true,"ConnectionStatus",getApplicationContext());
+                    BroadcastUtils.sendStatus(true, getFILTER_DEVICE_STATUS(), getApplicationContext());
 
                     List<BluetoothGattService> serviceList = gatt.getServices();
                     for (BluetoothGattService service : serviceList) {
@@ -149,7 +150,7 @@ public class BleService extends Service {
                 @Override
                 public void onDisConnected(boolean isActiveDisConnected, BleDevice device, BluetoothGatt gatt, int status) {
                     Log.d("s","Disconnected");
-                    BroadcastUtils.sendStatus(false,"ConnectionStatus",getApplicationContext());
+                    BroadcastUtils.sendStatus(false, getFILTER_DEVICE_STATUS(), getApplicationContext());
 
                 }
             });
@@ -163,7 +164,7 @@ public class BleService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        BroadcastUtils.sendStatus(false,"BleStatus",getApplicationContext());
+        BroadcastUtils.sendStatus(false, getFILTER_BLE_STATUS() ,getApplicationContext());
     }
 }
 
