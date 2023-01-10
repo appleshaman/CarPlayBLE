@@ -35,7 +35,7 @@ import java.lang.reflect.Type;
 public class MainActivity extends AppCompatActivity {
 
     private BleService.BleBinder controlBle;
-    private MyServiceConn serviceConnToNotification;
+    private ServiceConnToNotification serviceConnToNotification;
 
     private Button buttonOpenNotification;
     private Button buttonScanNewDevice;
@@ -152,13 +152,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initService(){
-        serviceConnToNotification = new MyServiceConn();
+        serviceConnToNotification = new ServiceConnToNotification();
         Intent intent = new Intent(this, BleService.class);
         bindService(intent, serviceConnToNotification, BIND_AUTO_CREATE);
         startService(intent);//bind the service
     }
 
-    class MyServiceConn implements ServiceConnection {
+    class ServiceConnToNotification implements ServiceConnection {
         @Override
         public void onServiceConnected(ComponentName name, IBinder iBinder){
             controlBle = (BleService.BleBinder)iBinder;

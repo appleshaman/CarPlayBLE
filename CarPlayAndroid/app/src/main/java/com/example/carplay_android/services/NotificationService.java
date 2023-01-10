@@ -25,7 +25,7 @@ import com.example.carplay_android.utils.DirectionUtils;
 public class NotificationService extends NotificationListenerService {
 
     private BleService.BleBinder controlBle;
-    private MyServiceConn serviceConnToBle;
+    private ServiceConnToBle serviceConnToBle;
     private Boolean deviceStatus = false;
 
 
@@ -40,8 +40,6 @@ public class NotificationService extends NotificationListenerService {
         BroadcastUtils.sendStatus(true, getFILTER_NOTIFICATION_STATUS(), getApplicationContext());
         DirectionUtils.loadSamplesFromAsserts(getApplicationContext());
     }
-
-
 
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
@@ -108,7 +106,7 @@ public class NotificationService extends NotificationListenerService {
     }
 
     private void initService(){
-        serviceConnToBle = new MyServiceConn();
+        serviceConnToBle = new ServiceConnToBle();
         Intent intent = new Intent(this, BleService.class);
         bindService(intent, serviceConnToBle, BIND_AUTO_CREATE);
         startService(intent);//bind the service
@@ -121,7 +119,7 @@ public class NotificationService extends NotificationListenerService {
         localBroadcastManager.registerReceiver(receiverForDeviceStatus, intentFilterForDeviceStatus);
     }
 
-    private class MyServiceConn implements ServiceConnection {
+    private class ServiceConnToBle implements ServiceConnection {
         @Override
         public void onServiceConnected(ComponentName name, IBinder iBinder){
             controlBle = (BleService.BleBinder)iBinder;

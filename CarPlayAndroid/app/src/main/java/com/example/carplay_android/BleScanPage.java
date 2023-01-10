@@ -37,7 +37,7 @@ public class BleScanPage extends AppCompatActivity {
     private LeDeviceListAdapter leDeviceListAdapter = new LeDeviceListAdapter(this);
 
     private BleService.BleBinder controlBle;
-    private MyServiceConn serviceConnBle;
+    private ServiceConnBle serviceConnBle;
 
     private BleDevice deviceSelected;
 
@@ -102,7 +102,7 @@ public class BleScanPage extends AppCompatActivity {
     }
 
     private void initService(){
-        serviceConnBle = new MyServiceConn();
+        serviceConnBle = new ServiceConnBle();
         Intent intent = new Intent(this, BleService.class);
         bindService(intent, serviceConnBle, BIND_AUTO_CREATE);
         startService(intent);//bind the service
@@ -120,7 +120,7 @@ public class BleScanPage extends AppCompatActivity {
         }
     }
 
-    private class MyServiceConn implements ServiceConnection {
+    private class ServiceConnBle implements ServiceConnection {
         @Override
         public void onServiceConnected(ComponentName name, IBinder iBinder){
             controlBle = (BleService.BleBinder)iBinder;
