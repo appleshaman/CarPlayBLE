@@ -1,16 +1,12 @@
 package com.example.carplay_android.utils;
 
 import android.content.Context;
-import android.content.Intent;
 import android.widget.Toast;
-
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.clj.fastble.BleManager;
 import com.clj.fastble.callback.BleScanCallback;
 import com.clj.fastble.data.BleDevice;
 import com.clj.fastble.scan.BleScanRuleConfig;
-import com.example.carplay_android.JavaBeanDevice;
 
 import java.util.List;
 

@@ -1,5 +1,7 @@
 package com.example.carplay_android;
 
+import static com.example.carplay_android.javabeans.JavaBeanFilters.*;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
@@ -22,6 +24,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.clj.fastble.data.BleDevice;
+import com.example.carplay_android.javabeans.JavaBeanDevice;
 import com.example.carplay_android.services.BleService;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -32,9 +35,7 @@ import java.lang.reflect.Type;
 public class MainActivity extends AppCompatActivity {
 
     private BleService.BleBinder controlBle;
-    private BleService bleService;
-    private MyServiceConn myServiceConn;
-    private Intent intent;
+    private ServiceConnToNotification serviceConnToNotification;
 
     private Button buttonOpenNotification;
     private Button buttonScanNewDevice;
@@ -46,6 +47,8 @@ public class MainActivity extends AppCompatActivity {
     private TextView deviceName;
 
     private BleDevice deviceUsed;
+
+
 
 
     @Override
@@ -83,14 +86,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
-
-
-
-
-
-
-
     }
 
     private void init(){
@@ -110,17 +105,15 @@ public class MainActivity extends AppCompatActivity {
         imageViewDeviceStatus = findViewById(R.id.imageViewDevice);
         deviceName = findViewById(R.id.textViewDeviceName);
 
-        SharedPreferences sharedPreferences = getSharedPreferences("DeviceUsed", 0);
-        String json = sharedPreferences.getString("DeviceUsed", null);
-        if(json != null){
-            Gson gson = new Gson();
-            Type type = new TypeToken<JavaBeanDevice>(){}.getType();
-            JavaBeanDevice javaBeanDevice = gson.fromJson(json, type);
-            deviceUsed = javaBeanDevice.getBleDevice();
-            deviceName.setText(deviceUsed.getName());
-        }
-
-
+//        SharedPreferences sharedPreferences = getSharedPreferences(getFILTER_DEVICE_USED(), 0);
+//        String json = sharedPreferences.getString(getFILTER_DEVICE_USED(), null);
+//        if(json != null){
+//            Gson gson = new Gson();
+//            Type type = new TypeToken<JavaBeanDevice>(){}.getType();
+//            JavaBeanDevice javaBeanDevice = gson.fromJson(json, type);
+//            deviceUsed = javaBeanDevice.getBleDevice();
+//            deviceName.setText(deviceUsed.getName());
+//        }
     }
 
     private void askPermission(){
@@ -135,46 +128,40 @@ public class MainActivity extends AppCompatActivity {
 
     private void initBroadcastReceiver(){
         IntentFilter intentFilter;
+        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
 
-        intentFilter = new IntentFilter("DeviceUsed");
-        LocalBroadcastManager localBroadcastManagerForDeviceUsed = LocalBroadcastManager.getInstance(getApplicationContext());
+        intentFilter = new IntentFilter(getFILTER_DEVICE_USED());
         ReceiverForDeviceUsed receiverForDeviceUsed = new ReceiverForDeviceUsed();
-        localBroadcastManagerForDeviceUsed.registerReceiver(receiverForDeviceUsed, intentFilter);
+        localBroadcastManager.registerReceiver(receiverForDeviceUsed, intentFilter);
 
-        intentFilter = new IntentFilter("BTStatus");
-        LocalBroadcastManager localBroadcastManagerForBTStatus = LocalBroadcastManager.getInstance(getApplicationContext());
+        intentFilter = new IntentFilter(getFILTER_BT_STATUS());
         ReceiverForBTStatus receiverForBTStatus = new ReceiverForBTStatus();
-        localBroadcastManagerForBTStatus.registerReceiver(receiverForBTStatus, intentFilter);
+        localBroadcastManager.registerReceiver(receiverForBTStatus, intentFilter);
 
-        intentFilter = new IntentFilter("BleStatus");
-        LocalBroadcastManager localBroadcastManagerForBleStatus = LocalBroadcastManager.getInstance(getApplicationContext());
+        intentFilter = new IntentFilter(getFILTER_BLE_STATUS());
         ReceiverForBleStatus receiverForBleStatus = new ReceiverForBleStatus();
-        localBroadcastManagerForBleStatus.registerReceiver(receiverForBleStatus, intentFilter);
+        localBroadcastManager.registerReceiver(receiverForBleStatus, intentFilter);
 
-        intentFilter = new IntentFilter("NotificationStatus");
-        LocalBroadcastManager localBroadcastManagerForNotificationStatus = LocalBroadcastManager.getInstance(getApplicationContext());
+        intentFilter = new IntentFilter(getFILTER_NOTIFICATION_STATUS());
         ReceiverForNotificationStatus receiverForNotificationStatus = new ReceiverForNotificationStatus();
-        localBroadcastManagerForNotificationStatus.registerReceiver(receiverForNotificationStatus, intentFilter);
+        localBroadcastManager.registerReceiver(receiverForNotificationStatus, intentFilter);
 
-        intentFilter = new IntentFilter("DeviceStatus");
-        LocalBroadcastManager localBroadcastManagerForDeviceStatus = LocalBroadcastManager.getInstance(getApplicationContext());
+        intentFilter = new IntentFilter(getFILTER_DEVICE_STATUS());
         ReceiverForDeviceUsed receiverForDeviceStatus = new ReceiverForDeviceUsed();
-        localBroadcastManagerForDeviceStatus.registerReceiver(receiverForDeviceStatus, intentFilter);
-
+        localBroadcastManager.registerReceiver(receiverForDeviceStatus, intentFilter);
     }
 
     private void initService(){
-        myServiceConn = new MyServiceConn();
-        intent = new Intent(this, BleService.class);
-        bindService(intent, myServiceConn, BIND_AUTO_CREATE);
+        serviceConnToNotification = new ServiceConnToNotification();
+        Intent intent = new Intent(this, BleService.class);
+        bindService(intent, serviceConnToNotification, BIND_AUTO_CREATE);
         startService(intent);//bind the service
     }
 
-    class MyServiceConn implements ServiceConnection {
+    class ServiceConnToNotification implements ServiceConnection {
         @Override
         public void onServiceConnected(ComponentName name, IBinder iBinder){
             controlBle = (BleService.BleBinder)iBinder;
-            bleService = controlBle.getService();
         }
         @Override
         public void onServiceDisconnected(ComponentName name){
@@ -186,15 +173,15 @@ public class MainActivity extends AppCompatActivity {
     class ReceiverForDeviceUsed extends BroadcastReceiver{
         @Override
         public void onReceive(Context context, Intent intent) {
-            JavaBeanDevice javaBeanDevice = (JavaBeanDevice) intent.getSerializableExtra("DeviceUsed");
-            deviceUsed = javaBeanDevice.getBleDevice();
-            deviceName.setText(deviceUsed.getName());
-            SharedPreferences sharedPreferences = getSharedPreferences("DeviceUsed", 0);
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            Gson gson = new Gson();
-            String json = gson.toJson(javaBeanDevice);
-            editor.putString("DeviceUsed", json);
-            editor.apply();
+//            JavaBeanDevice javaBeanDevice = (JavaBeanDevice) intent.getSerializableExtra(getFILTER_DEVICE_USED());
+//            deviceUsed = javaBeanDevice.getBleDevice();
+//            deviceName.setText(deviceUsed.getName());
+//            SharedPreferences sharedPreferences = getSharedPreferences(getFILTER_DEVICE_USED(), 0);
+//            SharedPreferences.Editor editor = sharedPreferences.edit();
+//            Gson gson = new Gson();
+//            String json = gson.toJson(javaBeanDevice);
+//            editor.putString(getFILTER_DEVICE_USED(), json);
+//            editor.apply();
 
         }
     }
@@ -202,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
     class ReceiverForBTStatus extends BroadcastReceiver{
         @Override
         public void onReceive(Context context, Intent intent) {
-            if(intent.getBooleanExtra("BTStatus",false)){
+            if(intent.getBooleanExtra(getFILTER_BT_STATUS(),false)){
                 imageViewBTStatus.setColorFilter(Color.GREEN);
             }else{
                 imageViewBTStatus.setColorFilter(0x9c9c9c);
@@ -213,7 +200,7 @@ public class MainActivity extends AppCompatActivity {
     class ReceiverForBleStatus extends BroadcastReceiver{
         @Override
         public void onReceive(Context context, Intent intent) {
-            if(intent.getBooleanExtra("BleStatus",false)){
+            if(intent.getBooleanExtra(getFILTER_BLE_STATUS(),false)){
                 imageViewBleStatus.setColorFilter(Color.GREEN);
             }else{
                 imageViewBleStatus.setColorFilter(0x9c9c9c);
@@ -224,7 +211,7 @@ public class MainActivity extends AppCompatActivity {
     class ReceiverForNotificationStatus extends BroadcastReceiver{
         @Override
         public void onReceive(Context context, Intent intent) {
-            if(intent.getBooleanExtra("NotificationStatus",false)){
+            if(intent.getBooleanExtra(getFILTER_NOTIFICATION_STATUS(),false)){
                 imageViewNotificationStatus.setColorFilter(Color.GREEN);
             }else{
                 imageViewNotificationStatus.setColorFilter(0x9c9c9c);
@@ -235,7 +222,7 @@ public class MainActivity extends AppCompatActivity {
     class ReceiverForDeviceStatus extends BroadcastReceiver{
         @Override
         public void onReceive(Context context, Intent intent) {
-            if(intent.getBooleanExtra("DeviceStatus",false)){
+            if(intent.getBooleanExtra(getFILTER_DEVICE_STATUS(),false)){
                 imageViewDeviceStatus.setColorFilter(Color.GREEN);
             }else{
                 imageViewDeviceStatus.setColorFilter(0x9c9c9c);
@@ -246,7 +233,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unbindService(myServiceConn);
+        unbindService(serviceConnToNotification);
     }
 }
 

@@ -1,6 +1,7 @@
 package com.example.carplay_android;
 
 import static com.example.carplay_android.utils.ScanBleDeviceUtils.scanLeDevice;
+import static com.example.carplay_android.javabeans.JavaBeanFilters.*;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -36,14 +37,8 @@ public class BleScanPage extends AppCompatActivity {
 
     private LeDeviceListAdapter leDeviceListAdapter = new LeDeviceListAdapter(this);
 
-    private ReceiverForScanning receiverForScanning;
-    private LocalBroadcastManager localBroadcastManagerForScanning;
-    private IntentFilter intentFilterForScanning;
-
     private BleService.BleBinder controlBle;
-    private BleService bleService;
-    private MyServiceConn myServiceConn;
-    private Intent intent;
+    private ServiceConnBle serviceConnBle;
 
     private BleDevice deviceSelected;
 
@@ -101,16 +96,16 @@ public class BleScanPage extends AppCompatActivity {
     }
 
     private void initBroadcastReceiver(){
-        localBroadcastManagerForScanning = LocalBroadcastManager.getInstance(getApplicationContext());
-        receiverForScanning = new ReceiverForScanning();
-        intentFilterForScanning = new IntentFilter("DeviceList");
+        LocalBroadcastManager localBroadcastManagerForScanning = LocalBroadcastManager.getInstance(getApplicationContext());
+        ReceiverForScanning receiverForScanning = new ReceiverForScanning();
+        IntentFilter intentFilterForScanning = new IntentFilter(getFilterDeviceList());
         localBroadcastManagerForScanning.registerReceiver(receiverForScanning, intentFilterForScanning);
     }
 
     private void initService(){
-        myServiceConn = new MyServiceConn();
-        intent = new Intent(this, BleService.class);
-        bindService(intent, myServiceConn, BIND_AUTO_CREATE);
+        serviceConnBle = new ServiceConnBle();
+        Intent intent = new Intent(this, BleService.class);
+        bindService(intent, serviceConnBle, BIND_AUTO_CREATE);
         startService(intent);//bind the service
     }
 
@@ -121,16 +116,16 @@ public class BleScanPage extends AppCompatActivity {
             Toast toast = Toast.makeText(getApplicationContext(), text, duration);
             toast.show();
         }else{
+            controlBle.setMtu(deviceSelected);
             controlBle.connectLeDevice(deviceSelected);
-            BroadcastUtils.sendBleDevice(deviceSelected, "DeviceUsed", getApplicationContext());//send this device to main page
+            //BroadcastUtils.sendBleDevice(deviceSelected,getFILTER_DEVICE_USED(), getApplicationContext());//send this device to main page
         }
     }
 
-    private class MyServiceConn implements ServiceConnection {
+    private class ServiceConnBle implements ServiceConnection {
         @Override
         public void onServiceConnected(ComponentName name, IBinder iBinder){
             controlBle = (BleService.BleBinder)iBinder;
-            bleService = controlBle.getService();
         }
         @Override
         public void onServiceDisconnected(ComponentName name){
@@ -148,7 +143,7 @@ public class BleScanPage extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unbindService(myServiceConn);
+        unbindService(serviceConnBle);
     }
 }
 

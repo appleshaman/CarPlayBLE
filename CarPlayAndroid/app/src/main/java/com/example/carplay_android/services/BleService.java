@@ -1,5 +1,7 @@
 package com.example.carplay_android.services;
 
+import static com.example.carplay_android.javabeans.JavaBeanFilters.*;
+
 import android.app.Service;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
@@ -15,6 +17,7 @@ import androidx.annotation.Nullable;
 
 import com.clj.fastble.BleManager;
 import com.clj.fastble.callback.BleGattCallback;
+import com.clj.fastble.callback.BleMtuChangedCallback;
 import com.clj.fastble.callback.BleReadCallback;
 import com.clj.fastble.callback.BleWriteCallback;
 import com.clj.fastble.data.BleDevice;
@@ -30,6 +33,8 @@ import java.util.UUID;
 public class BleService extends Service {
 
     private Timer timerBTState;
+    private BleDevice bleDeviceConnectTo;
+
 
     @Nullable
     @Override
@@ -41,27 +46,29 @@ public class BleService extends Service {
     public void onCreate() {
         super.onCreate();
         setBTCheckTimer();
-        BroadcastUtils.sendStatus(true, "BleStatus", getApplicationContext());
+        BroadcastUtils.sendStatus(true, getFILTER_BLE_STATUS(), getApplicationContext());
+
+
     }
 
-    public void setBTCheckTimer(){
-        if(timerBTState == null){
+    public void setBTCheckTimer() {
+        if (timerBTState == null) {
             timerBTState = new Timer();
-            TimerTask  timerTask = new TimerTask() {
+            TimerTask timerTask = new TimerTask() {
                 @Override
                 public void run() {
                     BleManager.getInstance().init(getApplication());
                     boolean status = false;
-                    if(BleManager.getInstance().isSupportBle()){
-                        if(!BleManager.getInstance().isBlueEnable()){
+                    if (BleManager.getInstance().isSupportBle()) {
+                        if (!BleManager.getInstance().isBlueEnable()) {
                             BleManager.getInstance().enableBluetooth();
                             //check again see if BT is enabled
                             status = !BleManager.getInstance().isBlueEnable();
-                        }else{
+                        } else {
                             status = true;
                         }
                     }
-                    BroadcastUtils.sendStatus( status, "BTStatus",getApplicationContext());
+                    BroadcastUtils.sendStatus(status, getFILTER_BT_STATUS(), getApplicationContext());
                 }
             };
             timerBTState.schedule(timerTask, 10, 1000);
@@ -72,8 +79,23 @@ public class BleService extends Service {
         public BleService getService() {
             return BleService.this;
         }
+        public void setMtu(BleDevice bleDevice){
+            BleManager.getInstance().setMtu(bleDevice, 512, new BleMtuChangedCallback() {
+                @Override
+                public void onSetMTUFailure(BleException exception) {
+                    // 设置MTU失败
+                    int a = 2;
+                }
 
-        public void connectLeDevice(BleDevice bleDevice){
+                @Override
+                public void onMtuChanged(int mtu) {
+                    // 设置MTU成功，并获得当前设备传输支持的MTU值
+                    int a = mtu;
+                }
+            });
+        }
+
+        public void connectLeDevice(BleDevice bleDevice) {
             BleManager.getInstance().connect((BleDevice) bleDevice, new BleGattCallback() {
                 @Override
                 public void onStartConnect() {
@@ -82,87 +104,88 @@ public class BleService extends Service {
 
                 @Override
                 public void onConnectFail(BleDevice bleDevice, BleException exception) {
-                    Log.d("s","Connect failed");
+                    Log.d("s", "Connect failed");
                 }
 
                 @Override
                 public void onConnectSuccess(BleDevice bleDevice, BluetoothGatt gatt, int status) {
-                    Log.d("s","Connect success");
-                    BroadcastUtils.sendStatus(true,"ConnectionStatus",getApplicationContext());
+                    Log.d("s", "Connect success");
 
-                    List<BluetoothGattService> serviceList = gatt.getServices();
-                    for (BluetoothGattService service : serviceList) {
-                        UUID uuid_service = service.getUuid();
-
-                        List<BluetoothGattCharacteristic> characteristicList= service.getCharacteristics();
-                        for(BluetoothGattCharacteristic characteristic : characteristicList) {
-                            UUID uuid_chara = characteristic.getUuid();
-                        }
-                    }
-                    String uuid_service;
-                    String uuid_characteristic_read;
-                    BleManager.getInstance().read(
-                            bleDevice,
-                            uuid_service = "4fafc201-1fb5-459e-8fcc-c5c9c331914b",
-                            uuid_characteristic_read ="beb5483e-36e1-4688-b7f5-ea07361b26a8",
-                            new BleReadCallback() {
-                                @Override
-                                public void onReadSuccess(byte[] data) {
-                                    // 读特征值数据成功
-                                    Log.d("1","读特征值数据成功");
-                                    Log.d("1", new String(data));
-                                }
-
-                                @Override
-                                public void onReadFailure(BleException exception) {
-                                    // 读特征值数据失败
-                                    Log.d("1","读特征值数据失败");
-                                }
-                            });
-
-                    String uuid_characteristic_write = "beb5483e-36e1-4688-b7f5-ea07361b26a8";
-                    byte[] data = "123312334".getBytes();
-                    for (int i =0; i < 10; i++) {
-                        BleManager.getInstance().write(
-                                bleDevice,
-                                uuid_service,
-                                uuid_characteristic_write,
-                                data,
-                                new BleWriteCallback() {
-                                    @Override
-                                    public void onWriteSuccess(int current, int total, byte[] justWrite) {
-                                        // 发送数据到设备成功（分包发送的情况下，可以通过方法中返回的参数可以查看发送进度）
-                                        Log.d("1", "发送成功");
-                                    }
-
-                                    @Override
-                                    public void onWriteFailure(BleException exception) {
-                                        // 发送数据到设备失败
-                                        Log.d("1", "发送shibai");
-                                    }
-                                });
-                    }
+                    BroadcastUtils.sendStatus(true, getFILTER_DEVICE_STATUS(), getApplicationContext());
+                    bleDeviceConnectTo = bleDevice;
 
 
                 }
 
                 @Override
                 public void onDisConnected(boolean isActiveDisConnected, BleDevice device, BluetoothGatt gatt, int status) {
-                    Log.d("s","Disconnected");
-                    BroadcastUtils.sendStatus(false,"ConnectionStatus",getApplicationContext());
+                    Log.d("s", "Disconnected");
+                    BroadcastUtils.sendStatus(false, getFILTER_DEVICE_STATUS(), getApplicationContext());
 
                 }
             });
         }
 
-    }
+        public void sendDestination(String information){
+            String DESTINATION_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8";
+            sendToDevice(information, DESTINATION_UUID);
+        }
+        public void sendEta(String information){
+            String ETA_UUID = "ca83fac2-2438-4d14-a8ae-a01831c0cf0d";
+            sendToDevice(information, ETA_UUID);
+        }
+        public void sendDirection(String information){
+            String DIRECTION_UUID = "dfc521a5-ce89-43bd-82a0-28a37f3a2b5a";
+            sendToDevice(information, DIRECTION_UUID);
+        }
+        public void sendEtaInMinutes(String information){
+            String ETA_DISTANCE_UUID = "563c187d-ff17-4a6a-8061-ca9b7b70b2b0";
+            sendToDevice(information, ETA_DISTANCE_UUID);
+        }
+        public void sendDistance(String information){
+            String ETA_DISTANCE_UUID = "8bf31540-eb0d-476c-b233-f514678d2afb";
+            sendToDevice(information, ETA_DISTANCE_UUID);
+        }
+        public void sendDirectionPrecise(String information){
+            String DIRECTION_PRECISE_UUID = "a602346d-c2bb-4782-8ea7-196a11f85113";
+            sendToDevice(information, DIRECTION_PRECISE_UUID);
+        }
 
+        private void sendToDevice(String informationMessage, String uuid) {
+
+            String uuid_service = "4fafc201-1fb5-459e-8fcc-c5c9c331914b";
+            byte[] data = informationMessage.getBytes();
+            BleManager.getInstance().write(
+                    bleDeviceConnectTo,
+                    uuid_service,
+                    uuid,
+                    data,
+                    new BleWriteCallback() {
+                        @Override
+                        public void onWriteSuccess(int current, int total, byte[] justWrite) {
+                            Log.d("1", "Success to send");
+                        }
+
+                        @Override
+                        public void onWriteFailure(BleException exception) {
+                            // 发送数据到设备失败
+                            Log.d("1", "Failed to send");
+                            new Handler().postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    sendToDevice(informationMessage, uuid);
+                                }
+                            },100);
+                        }
+                    });
+        }
+    }
 
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        BroadcastUtils.sendStatus(false,"BleStatus",getApplicationContext());
+        BroadcastUtils.sendStatus(false, getFILTER_BLE_STATUS(), getApplicationContext());
     }
 }
 

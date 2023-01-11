@@ -1,44 +1,59 @@
 package com.example.carplay_android.services;
 
+import static com.example.carplay_android.javabeans.JavaBeanFilters.*;
 
 import android.app.Notification;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
-import android.graphics.BitmapFactory;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Icon;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
-import android.widget.Toast;
 
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import com.clj.fastble.BleManager;
 import com.example.carplay_android.utils.BroadcastUtils;
 import com.example.carplay_android.utils.DirectionUtils;
 
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.Timer;
+import java.util.TimerTask;
+
+
 public class NotificationService extends NotificationListenerService {
+
+    private BleService.BleBinder controlBle;
+    private ServiceConnToBle serviceConnToBle;
+    private Boolean deviceStatus = false;
+    private Timer timerSendNotification;
+    private Boolean ifSendNotification = false;
+    private String[] informationMessageSentLastTime = new String[6];
+
     public NotificationService() {
 
     }
 
+
+
     @Override
     public void onCreate() {
         super.onCreate();
-        Context context = getApplicationContext();
-        CharSequence text = "onCreate";
-        int duration = Toast.LENGTH_SHORT;
-        Toast toast = Toast.makeText(context, text, duration);
-        toast.show();
-        BroadcastUtils.sendStatus(true, "NotificationStatus", getApplicationContext());
-        DirectionUtils.loadSamplesFromAsserts(getApplicationContext());
+        init();
+
     }
-
-
 
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
         super.onNotificationPosted(sbn);
-        Log.d("!","Posted");
         if (sbn != null && isGMapNotification(sbn)){
             handleGMapNotification(sbn);
         }
@@ -47,7 +62,7 @@ public class NotificationService extends NotificationListenerService {
     @Override
     public void onNotificationRemoved(StatusBarNotification sbn) {
         super.onNotificationRemoved(sbn);
-        Log.d("!","removed");
+        Log.d("Notification","removed");
     }
 
 
@@ -62,44 +77,139 @@ public class NotificationService extends NotificationListenerService {
 
     private void handleGMapNotification (StatusBarNotification sbn){
         Bundle bundle = sbn.getNotification().extras;
-
+        String[] informationMessage = new String[6];
         String string = bundle.getString(Notification.EXTRA_TEXT);
-        String[] strings = string.split("-");
-        bundle.putString("destination",strings[0]);
-        strings = strings[1].split(" ");
+        String[] strings = string.split("-");//destination
+        informationMessage[0] = strings[0].trim();
+        strings = strings[1].trim().split(" ");
         if(strings.length == 3){
-            strings[0] = strings[0].concat(" ");//concat a " "
-            strings[0] = strings[0].concat(strings[1]);//if use 12 hour type, then concat the time and AM/PM
+            strings[0] = strings[0] + " ";//concat a " "
+            strings[0] = strings[0] + strings[1];//if use 12 hour type, then concat the time and AM/PM
         }
-        bundle.putString("ETA",strings[1]);
+        informationMessage[1] = strings[0];// get the ETA
 
         string = bundle.getString(Notification.EXTRA_TITLE);
         strings = string.split("-");
         if(strings.length  == 2){
-            bundle.putString("Direction",strings[1]);
+            informationMessage[2] = strings[0].trim() + "$"  + strings[1].trim();//time to next direction + Direction to somewhere
         }
         else if(strings.length  == 1){
+            informationMessage[2] = strings[0].trim();//Direction to somewhere
             bundle.putString("Direction",strings[0]);
         }
 
         string = bundle.getString(Notification. EXTRA_SUB_TEXT);
         strings = string.split("·");
-        bundle.putString("Minutes",strings[0]);
-        bundle.putString("Distance",strings[1]);
-
-
+        informationMessage[3] = strings[0].trim();//ETA in Minutes
+        informationMessage[4] = strings[1].trim();//Distance
         BitmapDrawable bitmapDrawable = (BitmapDrawable) sbn.getNotification().getLargeIcon().loadDrawable(getApplicationContext());
 
-        String direction = DirectionUtils.getDirectionByComparing(bitmapDrawable.getBitmap());
-        direction = direction;
+        informationMessage[5] = DirectionUtils.getDirectionByComparing(bitmapDrawable.getBitmap());
 
+        if(deviceStatus){
+            if((!Arrays.equals(informationMessageSentLastTime, informationMessage))||
+                    ((Arrays.equals(informationMessageSentLastTime, informationMessage))&&(ifSendNotification))){
+                controlBle.sendDestination(informationMessage[0]);
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        controlBle.sendEta(informationMessage[1]);
+                    }
+                },100);
+
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        controlBle.sendDirection(informationMessage[2]);
+                    }
+                },100);
+
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        controlBle.sendEtaInMinutes(informationMessage[3]);
+                    }
+                },100);
+
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        controlBle.sendDistance(informationMessage[4]);
+                    }
+                },100);
+
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        controlBle.sendDirectionPrecise(informationMessage[5]);
+                    }
+                },100);
+                Log.d("d","done");
+                informationMessageSentLastTime = informationMessage;
+                ifSendNotification = false;//reduce the frequency of sending messages
+                //why not just check if two messages are the same,  why still need to send same message every half second:
+                //because if the device lost connection before, we have to keep send message to it to keep it does not
+                //receive any wrong message.
+            }
+        }
     }
 
+    private void init(){
+        initService();
+        initBroadcastReceiver();
+        setSendNotificationTimer();
+        BroadcastUtils.sendStatus(true, getFILTER_NOTIFICATION_STATUS(), getApplicationContext());
+        DirectionUtils.loadSamplesFromAsserts(getApplicationContext());
+    }
 
+    private void initService(){
+        serviceConnToBle = new ServiceConnToBle();
+        Intent intent = new Intent(this, BleService.class);
+        bindService(intent, serviceConnToBle, BIND_AUTO_CREATE);
+        startService(intent);//bind the service
+    }
+
+    private void initBroadcastReceiver(){
+        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
+        ReceiverForDeviceStatus receiverForDeviceStatus = new ReceiverForDeviceStatus();
+        IntentFilter intentFilterForDeviceStatus = new IntentFilter(getFILTER_DEVICE_STATUS());
+        localBroadcastManager.registerReceiver(receiverForDeviceStatus, intentFilterForDeviceStatus);
+    }
+
+    private class ServiceConnToBle implements ServiceConnection {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder iBinder){
+            controlBle = (BleService.BleBinder)iBinder;
+        }
+        @Override
+        public void onServiceDisconnected(ComponentName name){
+        }
+    }
+
+    private class ReceiverForDeviceStatus extends BroadcastReceiver{
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            deviceStatus = intent.getBooleanExtra(getFILTER_DEVICE_STATUS(), false);
+        }
+    }
+
+    public void setSendNotificationTimer(){
+        if(timerSendNotification == null){
+            timerSendNotification = new Timer();
+            TimerTask timerTask = new TimerTask() {
+                @Override
+                public void run() {
+                    ifSendNotification = true;
+                }
+            };
+            timerSendNotification.schedule(timerTask, 10, 2000);
+        }
+    }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        BroadcastUtils.sendStatus(false, "NotificationStatus", getApplicationContext());
+        BroadcastUtils.sendStatus(false, getFILTER_NOTIFICATION_STATUS(), getApplicationContext());
+        unbindService(serviceConnToBle);
     }
 }
