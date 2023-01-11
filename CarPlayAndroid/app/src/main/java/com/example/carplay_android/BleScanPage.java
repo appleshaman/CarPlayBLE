@@ -1,6 +1,7 @@
 package com.example.carplay_android;
 
 import static com.example.carplay_android.utils.ScanBleDeviceUtils.scanLeDevice;
+import static com.example.carplay_android.javabeans.JavaBeanFilters.*;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -97,7 +98,7 @@ public class BleScanPage extends AppCompatActivity {
     private void initBroadcastReceiver(){
         LocalBroadcastManager localBroadcastManagerForScanning = LocalBroadcastManager.getInstance(getApplicationContext());
         ReceiverForScanning receiverForScanning = new ReceiverForScanning();
-        IntentFilter intentFilterForScanning = new IntentFilter("DeviceList");
+        IntentFilter intentFilterForScanning = new IntentFilter(getFilterDeviceList());
         localBroadcastManagerForScanning.registerReceiver(receiverForScanning, intentFilterForScanning);
     }
 
@@ -115,8 +116,9 @@ public class BleScanPage extends AppCompatActivity {
             Toast toast = Toast.makeText(getApplicationContext(), text, duration);
             toast.show();
         }else{
+            controlBle.setMtu(deviceSelected);
             controlBle.connectLeDevice(deviceSelected);
-            BroadcastUtils.sendBleDevice(deviceSelected, "DeviceUsed", getApplicationContext());//send this device to main page
+            //BroadcastUtils.sendBleDevice(deviceSelected,getFILTER_DEVICE_USED(), getApplicationContext());//send this device to main page
         }
     }
 

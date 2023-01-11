@@ -105,15 +105,15 @@ public class MainActivity extends AppCompatActivity {
         imageViewDeviceStatus = findViewById(R.id.imageViewDevice);
         deviceName = findViewById(R.id.textViewDeviceName);
 
-        SharedPreferences sharedPreferences = getSharedPreferences(getFILTER_DEVICE_USED(), 0);
-        String json = sharedPreferences.getString(getFILTER_DEVICE_USED(), null);
-        if(json != null){
-            Gson gson = new Gson();
-            Type type = new TypeToken<JavaBeanDevice>(){}.getType();
-            JavaBeanDevice javaBeanDevice = gson.fromJson(json, type);
-            deviceUsed = javaBeanDevice.getBleDevice();
-            deviceName.setText(deviceUsed.getName());
-        }
+//        SharedPreferences sharedPreferences = getSharedPreferences(getFILTER_DEVICE_USED(), 0);
+//        String json = sharedPreferences.getString(getFILTER_DEVICE_USED(), null);
+//        if(json != null){
+//            Gson gson = new Gson();
+//            Type type = new TypeToken<JavaBeanDevice>(){}.getType();
+//            JavaBeanDevice javaBeanDevice = gson.fromJson(json, type);
+//            deviceUsed = javaBeanDevice.getBleDevice();
+//            deviceName.setText(deviceUsed.getName());
+//        }
     }
 
     private void askPermission(){
@@ -173,15 +173,15 @@ public class MainActivity extends AppCompatActivity {
     class ReceiverForDeviceUsed extends BroadcastReceiver{
         @Override
         public void onReceive(Context context, Intent intent) {
-            JavaBeanDevice javaBeanDevice = (JavaBeanDevice) intent.getSerializableExtra(getFILTER_DEVICE_USED());
-            deviceUsed = javaBeanDevice.getBleDevice();
-            deviceName.setText(deviceUsed.getName());
-            SharedPreferences sharedPreferences = getSharedPreferences(getFILTER_DEVICE_USED(), 0);
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            Gson gson = new Gson();
-            String json = gson.toJson(javaBeanDevice);
-            editor.putString(getFILTER_DEVICE_USED(), json);
-            editor.apply();
+//            JavaBeanDevice javaBeanDevice = (JavaBeanDevice) intent.getSerializableExtra(getFILTER_DEVICE_USED());
+//            deviceUsed = javaBeanDevice.getBleDevice();
+//            deviceName.setText(deviceUsed.getName());
+//            SharedPreferences sharedPreferences = getSharedPreferences(getFILTER_DEVICE_USED(), 0);
+//            SharedPreferences.Editor editor = sharedPreferences.edit();
+//            Gson gson = new Gson();
+//            String json = gson.toJson(javaBeanDevice);
+//            editor.putString(getFILTER_DEVICE_USED(), json);
+//            editor.apply();
 
         }
     }
