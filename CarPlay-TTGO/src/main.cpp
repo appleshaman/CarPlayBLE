@@ -2,6 +2,8 @@
 #include <BLEDevice.h>
 #include <BLEUtils.h>
 #include <BLEServer.h>
+#include <TFT_eSPI.h>
+#include <SPI.h>
 
 #define SERVICE_UUID "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
 
@@ -14,10 +16,17 @@
 BLEServer *pServer;
 BLEService *pService;
 
+TFT_eSPI tft = TFT_eSPI();
+
 void setup()
 {
     Serial.begin(115200);
     Serial.println("Starting BLE work!");
+    tft.init();
+    //tft.setRotation(1);
+    tft.fillScreen(0x38b25c);
+    tft.setTextColor(TFT_WHITE);
+
 
     BLEDevice::init("Navigator");
 
@@ -91,4 +100,17 @@ void loop()
     const char *g = a.c_str();
     Serial.println(g);
     Serial.println("");
+
+    if(pServer->getConnectedCount() == 0){
+        tft.drawString("No Connection", 10, 10, 7);
+    }else{
+        tft.drawString(b, 10, 10, 4);
+        tft.drawString(c, 10, 10, 4);
+        tft.drawString(d, 10, 10, 4);
+        tft.drawString(e, 10, 10, 4);
+        tft.drawString(f, 10, 10, 4);
+        tft.drawString(g, 10, 10, 4);
+    }
+    
+    
 }
