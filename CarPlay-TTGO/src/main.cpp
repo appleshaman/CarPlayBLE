@@ -3,7 +3,7 @@
 #include <BLEUtils.h>
 #include <BLEServer.h>
 #include <TFT_eSPI.h>
-#include <SPI.h>
+#include <Icons.h>
 
 #define SERVICE_UUID "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
 
@@ -18,52 +18,21 @@ BLEService *pService;
 
 TFT_eSPI tft = TFT_eSPI();
 
+void setupScreen();
+void setupCharateristic();
+
 void setup()
 {
-    Serial.begin(115200);
-    Serial.println("Starting BLE work!");
-    tft.init();
-    //tft.setRotation(1);
-    tft.fillScreen(0x38b25c);
-    tft.setTextColor(TFT_WHITE);
-
+    Serial.begin(921600);
+    Serial.println("Start!");
+    setupScreen();
 
     BLEDevice::init("Navigator");
 
     pServer = BLEDevice::createServer();
     pService = pServer->createService(SERVICE_UUID);
 
-    BLECharacteristic *destinationCharacteristic = pService->createCharacteristic(
-        DESTINATION_UUID,
-        BLECharacteristic::PROPERTY_READ |
-            BLECharacteristic::PROPERTY_WRITE);
-    BLECharacteristic *etaCharacteristic = pService->createCharacteristic(
-        ETA_UUID,
-        BLECharacteristic::PROPERTY_READ |
-            BLECharacteristic::PROPERTY_WRITE);
-    BLECharacteristic *directionCharacteristic = pService->createCharacteristic(
-        DIRECTION_UUID,
-        BLECharacteristic::PROPERTY_READ |
-            BLECharacteristic::PROPERTY_WRITE);
-    BLECharacteristic *etaInMinutesCharacteristic = pService->createCharacteristic(
-        ETA_MINUTES_UUID,
-        BLECharacteristic::PROPERTY_READ |
-            BLECharacteristic::PROPERTY_WRITE);
-    BLECharacteristic *distanceCharacteristic = pService->createCharacteristic(
-        DISTANCE_UUID,
-        BLECharacteristic::PROPERTY_READ |
-            BLECharacteristic::PROPERTY_WRITE);
-    BLECharacteristic *directionPreciseCharacteristic = pService->createCharacteristic(
-        DIRECTION_PRECISE_UUID,
-        BLECharacteristic::PROPERTY_READ |
-            BLECharacteristic::PROPERTY_WRITE);
-
-    destinationCharacteristic->setValue("destination");
-    etaCharacteristic->setValue("eta");
-    directionCharacteristic->setValue("direction");
-    etaInMinutesCharacteristic->setValue("ETA_InMinutes");
-    distanceCharacteristic->setValue("distance");
-    directionPreciseCharacteristic->setValue("directionPrecise");
+    setupCharateristic();
 
     pService->start();
     // BLEAdvertising *pAdvertising = pServer->getAdvertising();  // this still is working for backward compatibility
@@ -101,16 +70,64 @@ void loop()
     Serial.println(g);
     Serial.println("");
 
-    if(pServer->getConnectedCount() == 0){
-        tft.drawString("No Connection", 10, 10, 7);
-    }else{
-        tft.drawString(b, 10, 10, 4);
-        tft.drawString(c, 10, 10, 4);
-        tft.drawString(d, 10, 10, 4);
-        tft.drawString(e, 10, 10, 4);
-        tft.drawString(f, 10, 10, 4);
-        tft.drawString(g, 10, 10, 4);
+    if (pServer->getConnectedCount() == 0)
+    {
+        
+        //tft.drawString("No Connection", 30, 50, 4);
+        tft.setSwapBytes(true);
+        tft.pushImage(155, 0, 85, 85, ARRIVE);
+        Serial.println(pServer->getConnectedCount());
     }
+    else
+    {
+        tft.drawString(b, 10, 40, 4);
+        tft.drawString(c, 10, 10, 4);
+        tft.drawString(d, 30, 60, 4);
+        tft.drawString(e, 10, 20, 4);
+        tft.drawString(f, 50, 10, 4);
+        tft.drawString(g, 10, 0, 4);
+    }
+}
+
+void setupScreen()
+{
+    tft.init();
+    tft.setRotation(1);
     
-    
+    tft.fillScreen(tft.color565(56, 178, 92)); // 0x38b25c
+    tft.setTextColor(TFT_WHITE);
+}
+void setupCharateristic()
+{
+    BLECharacteristic *destinationCharacteristic = pService->createCharacteristic(
+        DESTINATION_UUID,
+        BLECharacteristic::PROPERTY_READ |
+            BLECharacteristic::PROPERTY_WRITE);
+    BLECharacteristic *etaCharacteristic = pService->createCharacteristic(
+        ETA_UUID,
+        BLECharacteristic::PROPERTY_READ |
+            BLECharacteristic::PROPERTY_WRITE);
+    BLECharacteristic *directionCharacteristic = pService->createCharacteristic(
+        DIRECTION_UUID,
+        BLECharacteristic::PROPERTY_READ |
+            BLECharacteristic::PROPERTY_WRITE);
+    BLECharacteristic *etaInMinutesCharacteristic = pService->createCharacteristic(
+        ETA_MINUTES_UUID,
+        BLECharacteristic::PROPERTY_READ |
+            BLECharacteristic::PROPERTY_WRITE);
+    BLECharacteristic *distanceCharacteristic = pService->createCharacteristic(
+        DISTANCE_UUID,
+        BLECharacteristic::PROPERTY_READ |
+            BLECharacteristic::PROPERTY_WRITE);
+    BLECharacteristic *directionPreciseCharacteristic = pService->createCharacteristic(
+        DIRECTION_PRECISE_UUID,
+        BLECharacteristic::PROPERTY_READ |
+            BLECharacteristic::PROPERTY_WRITE);
+
+    destinationCharacteristic->setValue("destination");
+    etaCharacteristic->setValue("eta");
+    directionCharacteristic->setValue("direction");
+    etaInMinutesCharacteristic->setValue("ETA_InMinutes");
+    distanceCharacteristic->setValue("distance");
+    directionPreciseCharacteristic->setValue("directionPrecise");
 }
