@@ -138,6 +138,10 @@ public class BleService extends Service {
             String DIRECTION_UUID = "dfc521a5-ce89-43bd-82a0-28a37f3a2b5a";
             sendToDevice(information, DIRECTION_UUID);
         }
+        public void sendDirectionDistances(String information){
+            String DIRECTION_UUID = "0343ff39-994e-481b-9136-036dabc02a0b";
+            sendToDevice(information, DIRECTION_UUID);
+        }
         public void sendEtaInMinutes(String information){
             String ETA_DISTANCE_UUID = "563c187d-ff17-4a6a-8061-ca9b7b70b2b0";
             sendToDevice(information, ETA_DISTANCE_UUID);

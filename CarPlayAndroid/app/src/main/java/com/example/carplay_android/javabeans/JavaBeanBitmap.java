@@ -8,6 +8,7 @@ public class JavaBeanBitmap implements Serializable {
     private String bitmapName;
     private Bitmap sampleBitmap;
 
+
     public void setBitmapName(String bitmapName) {
         this.bitmapName = bitmapName;
     }

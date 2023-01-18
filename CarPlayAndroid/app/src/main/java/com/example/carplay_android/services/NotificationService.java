@@ -77,7 +77,7 @@ public class NotificationService extends NotificationListenerService {
 
     private void handleGMapNotification (StatusBarNotification sbn){
         Bundle bundle = sbn.getNotification().extras;
-        String[] informationMessage = new String[6];
+        String[] informationMessage = new String[7];
         String string = bundle.getString(Notification.EXTRA_TEXT);
         String[] strings = string.split("-");//destination
         informationMessage[0] = strings[0].trim();
@@ -91,20 +91,23 @@ public class NotificationService extends NotificationListenerService {
         string = bundle.getString(Notification.EXTRA_TITLE);
         strings = string.split("-");
         if(strings.length  == 2){
-            informationMessage[2] = strings[0].trim() + "$"  + strings[1].trim();//time to next direction + Direction to somewhere
+            informationMessage[2] = strings[0].trim();//Direction to somewhere
+            informationMessage[3] = strings[1].trim();//Time to next direction
+
         }
         else if(strings.length  == 1){
             informationMessage[2] = strings[0].trim();//Direction to somewhere
+            informationMessage[3] = "N/A";//Time to next direction
             bundle.putString("Direction",strings[0]);
         }
 
         string = bundle.getString(Notification. EXTRA_SUB_TEXT);
         strings = string.split("·");
-        informationMessage[3] = strings[0].trim();//ETA in Minutes
-        informationMessage[4] = strings[1].trim();//Distance
+        informationMessage[4] = strings[0].trim();//ETA in Minutes
+        informationMessage[5] = strings[1].trim();//Distance
         BitmapDrawable bitmapDrawable = (BitmapDrawable) sbn.getNotification().getLargeIcon().loadDrawable(getApplicationContext());
 
-        informationMessage[5] = DirectionUtils.getDirectionByComparing(bitmapDrawable.getBitmap());
+        informationMessage[6] = DirectionUtils.getDirectionByComparing(bitmapDrawable.getBitmap());
 
         if(deviceStatus){
             if((!Arrays.equals(informationMessageSentLastTime, informationMessage))||
@@ -127,21 +130,28 @@ public class NotificationService extends NotificationListenerService {
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        controlBle.sendEtaInMinutes(informationMessage[3]);
+                        controlBle.sendDirectionDistances(informationMessage[3]);
                     }
                 },100);
 
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        controlBle.sendDistance(informationMessage[4]);
+                        controlBle.sendEtaInMinutes(informationMessage[4]);
                     }
                 },100);
 
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        controlBle.sendDirectionPrecise(informationMessage[5]);
+                        controlBle.sendDistance(informationMessage[5]);
+                    }
+                },100);
+
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        controlBle.sendDirectionPrecise(informationMessage[6]);
                     }
                 },100);
                 Log.d("d","done");
