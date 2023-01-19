@@ -5,6 +5,7 @@
 #include <TFT_eSPI.h>
 #include <Icons.h>
 #include <string.h>
+#include <sstream>
 
 #define SERVICE_UUID "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
 
@@ -38,7 +39,7 @@ void setup()
     setupCharateristic();
 
     pService->start();
-    // BLEAdvertising *pAdvertising = pServer->getAdvertising();  // this still is working for backward compatibility
+
     BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
     pAdvertising->addServiceUUID(SERVICE_UUID);
     pAdvertising->setScanResponse(true);
@@ -46,44 +47,38 @@ void setup()
     pAdvertising->setMinPreferred(0x12);
 
     BLEDevice::startAdvertising();
-    Serial.println("Characteristic defined! Now you can read it in your phone!");
+    Serial.println("Characteristic defined!");
 }
 
 void loop()
 {
-    // put your main code here, to run repeatedly:
+
     delay(2000);
+    tft.fillScreen(tft.color565(56, 178, 92)); // 0x38b25c
 
-    // pService->getCharacteristic(DESTINATION_UUID)->getValue();
-
-    // pService->getCharacteristic(DIRECTION_UUID)->getValue();// direction may contains two information
-
-    if (pServer->getConnectedCount() == 1)
+    if (pServer->getConnectedCount() == 0)
     {
-
         tft.pushImage(77, 10, 85, 85, NO_CONNECTION);
         tft.drawString("No Connection", 30, 95, 4);
-        Serial.println(pServer->getConnectedCount());
+        
     }
     else
     {
         tft.drawString("ETA:", 5, 5, 4);
-        tft.drawString(pService->getCharacteristic(ETA_UUID)->getValue().c_str(), 65, 5, 4);
+        tft.drawString(pService->getCharacteristic(ETA_UUID)->getValue().c_str(), 70, 5, 4);
 
         tft.drawString(pService->getCharacteristic(ETA_MINUTES_UUID)->getValue().c_str(), 5, 30, 4);
-        tft.drawString("mins left", 40, 30, 4);
+        tft.drawString("left", 100, 30, 4);
 
         tft.drawString(pService->getCharacteristic(DISTANCE_UUID)->getValue().c_str(), 5, 55, 4);
         tft.drawString("left", 100, 55, 4);
 
         drawDirectionImage(pService->getCharacteristic(DIRECTION_PRECISE_UUID)->getValue().c_str());
         tft.drawString(pService->getCharacteristic(DIRECTION_DISTANCE_UUID)->getValue().c_str(), 175, 95, 4);
-        //  tft.drawString(b, 10, 40, 4);
-        //  tft.drawString(c, 10, 10, 4);
-        //  tft.drawString(d, 30, 60, 4);
-        //  tft.drawString(e, 10, 20, 4);
-        //  tft.drawString(f, 50, 10, 4);
-        //  tft.drawString(g, 10, 0, 4);
+
+        tft.drawString(pService->getCharacteristic(DIRECTION_UUID)->getValue().c_str(), 5, 90, 4);
+
+        tft.drawString(pService->getCharacteristic(DESTINATION_UUID)->getValue().c_str(), 5, 115, 2);
     }
 }
 
@@ -91,7 +86,7 @@ void setupScreen()
 {
     tft.init();
     tft.setRotation(1);
-    tft.fillScreen(tft.color565(56, 178, 92)); // 0x38b25c
+    
     tft.setTextColor(TFT_WHITE);
     tft.setSwapBytes(true);
 }
@@ -133,159 +128,151 @@ void setupCharateristic()
     directionDistanceCharacteristic->setValue("N/A");
     etaInMinutesCharacteristic->setValue("00 mins");
     distanceCharacteristic->setValue("100 km");
-    directionPreciseCharacteristic->setValue("DEPART");
+    directionPreciseCharacteristic->setValue("34");
 }
 
 void drawDirectionImage(const char *direction)
 {
-    std::map<const char *, int> directionSet = {
-        {"ARRIVE", 0},
-        {"ARRIVE_LEFT", 1},
-        {"ARRIVE_RIGHT", 2},
-        {"CONTINUE_LEFT", 3},
-        {"CONTINUE_RETURN", 4},
-        {"CONTINUE_RIGHT", 5},
-        {"CONTINUE_SLIGHT_LEFT", 6},
-        {"CONTINUE_SLIGHT_RIGHT", 7},
-        {"CONTINUE_STRAIGHT", 8},
-        {"DEPART", 9},
-        {"FORK", 10},
-        {"POINTER", 11},
-        {"ROTATORY_EXIT", 12},
-        {"ROTATORY_EXIT_INVERTED", 13},
-        {"ROTATORY_LEFT", 14},
-        {"ROTATORY_LEFT_INVERTED", 15},
-        {"ROTATORY_RIGHT", 16},
-        {"ROTATORY_RIGHT_INVERTED", 17},
-        {"ROTATORY_SHARP_LEFT", 18},
-        {"ROTATORY_SHARP_LEFT_INVERTED", 19},
-        {"ROTATORY_SHARP_RIGHT", 20},
-        {"ROTATORY_SHARP_RIGHT_INVERTED", 21},
-        {"ROTATORY_SLIGHT_LEFT", 22},
-        {"ROTATORY_SLIGHT_LEFT_INVERTED", 23},
-        {"ROTATORY_SLIGHT_RIGHT", 24},
-        {"ROTATORY_SLIGHT_RIGHT_INVERTED", 25},
-        {"ROTATORY_STRAIGHT", 26},
-        {"ROTATORY_STRAIGHT_INVERTED", 27},
-        {"ROTATORY_TOTAL", 28},
-        {"ROTATORY_TOTAL_INVERTED", 29},
-        {"SHARP_LEFT", 30},
-        {"SHARP_RIGHT", 31},
-        {"SLIGHT_LEFT", 32},
-        {"SLIGHT_RIGHT", 33},
-        {"UNKNOWN", 34}, // special case
-    };
-    const char* temp = "UNKNOWN";
-    int caseValue = directionSet[temp];
-    Serial.println(direction);
-    Serial.println(caseValue);
-    switch (caseValue)
+    std::string temp = direction;
+
+    if (temp.compare("0") == 0)
     {
-    case 0:
         tft.pushImage(155, 0, 85, 85, ARRIVE);
-        break;
-    case 1:
+    }
+    else if (temp.compare("1") == 0)
+    {
         tft.pushImage(155, 0, 85, 85, ARRIVE_LEFT);
-        break;
-    case 2:
+    }
+    else if (temp.compare("2") == 0)
+    {
         tft.pushImage(155, 0, 85, 85, ARRIVE_RIGHT);
-        break;
-    case 3:
+    }
+    else if (temp.compare("3") == 0)
+    {
         tft.pushImage(155, 0, 85, 85, CONTINUE_LEFT);
-        break;
-    case 4:
+    }
+    else if (temp.compare("4") == 0)
+    {
         tft.pushImage(155, 0, 85, 85, CONTINUE_RETURN);
-        break;
-    case 5:
+    }
+    else if (temp.compare("5") == 0)
+    {
         tft.pushImage(155, 0, 85, 85, CONTINUE_RIGHT);
-        break;
-    case 6:
+    }
+    else if (temp.compare("6") == 0)
+    {
         tft.pushImage(155, 0, 85, 85, CONTINUE_SLIGHT_LEFT);
-        break;
-    case 7:
+    }
+    else if (temp.compare("7") == 0)
+    {
         tft.pushImage(155, 0, 85, 85, CONTINUE_SLIGHT_RIGHT);
-        break;
-    case 8:
+    }
+    else if (temp.compare("8") == 0)
+    {
         tft.pushImage(155, 0, 85, 85, CONTINUE_STRAIGHT);
-        break;
-    case 9:
+    }
+    else if (temp.compare("9")==0)
+    {
         tft.pushImage(155, 0, 85, 85, DEPART);
-        break;
-    case 10:
+    }
+    else if (temp.compare("10")==0)
+    {
         tft.pushImage(155, 0, 85, 85, FORK);
-        break;
-    case 11:
+    }
+    else if (temp.compare("11")==0)
+    {
         tft.pushImage(155, 0, 85, 85, POINTER);
-        break;
-    case 12:
+    }
+    else if (temp.compare("12")==0)
+    {
         tft.pushImage(155, 0, 85, 85, ROTATORY_EXIT);
-        break;
-    case 13:
+    }
+    else if (temp.compare("13")==0)
+    {
         tft.pushImage(155, 0, 85, 85, ROTATORY_EXIT_INVERTED);
-        break;
-    case 14:
+    }
+    else if (temp.compare("14")==0)
+    {
         tft.pushImage(155, 0, 85, 85, ROTATORY_LEFT);
-        break;
-    case 15:
+    }
+    else if (temp.compare("15")==0)
+    {
         tft.pushImage(155, 0, 85, 85, ROTATORY_LEFT_INVERTED);
-        break;
-    case 16:
+    }
+    else if (temp.compare("16")==0)
+    {
         tft.pushImage(155, 0, 85, 85, ROTATORY_RIGHT);
-        break;
-    case 17:
+    }
+    else if (temp.compare("17")==0)
+    {
         tft.pushImage(155, 0, 85, 85, ROTATORY_RIGHT_INVERTED);
-        break;
-    case 18:
+    }
+    else if (temp.compare("18")==0)
+    {
         tft.pushImage(155, 0, 85, 85, ROTATORY_SHARP_LEFT);
-        break;
-    case 19:
+    }
+    else if (temp.compare("19")==0)
+    {
         tft.pushImage(155, 0, 85, 85, ROTATORY_SHARP_LEFT_INVERTED);
-        break;
-    case 20:
+    }
+    else if (temp.compare("20")==0)
+    {
         tft.pushImage(155, 0, 85, 85, ROTATORY_SHARP_RIGHT);
-        break;
-    case 21:
+    }
+    else if (temp.compare("21")==0)
+    {
         tft.pushImage(155, 0, 85, 85, ROTATORY_SHARP_RIGHT_INVERTED);
-        break;
-    case 22:
+    }
+    else if (temp.compare("22")==0)
+    {
         tft.pushImage(155, 0, 85, 85, ROTATORY_SLIGHT_LEFT);
-        break;
-    case 23:
+    }
+    else if (temp.compare("23")==0)
+    {
         tft.pushImage(155, 0, 85, 85, ROTATORY_SLIGHT_LEFT_INVERTED);
-        break;
-    case 24:
+    }
+    else if (temp.compare("24")==0)
+    {
         tft.pushImage(155, 0, 85, 85, ROTATORY_SLIGHT_RIGHT);
-        break;
-    case 25:
+    }
+    else if (temp.compare("25")==0)
+    {
         tft.pushImage(155, 0, 85, 85, ROTATORY_SLIGHT_RIGHT_INVERTED);
-        break;
-    case 26:
+    }
+    else if (temp.compare("26")==0)
+    {
         tft.pushImage(155, 0, 85, 85, ROTATORY_STRAIGHT);
-        break;
-    case 27:
+    }
+    else if (temp.compare("27")==0)
+    {
         tft.pushImage(155, 0, 85, 85, ROTATORY_STRAIGHT_INVERTED);
-        break;
-    case 28:
+    }
+    else if (temp.compare("28")==0)
+    {
         tft.pushImage(155, 0, 85, 85, ROTATORY_TOTAL);
-        break;
-    case 29:
+    }
+    else if (temp.compare("29")==0)
+    {
         tft.pushImage(155, 0, 85, 85, ROTATORY_TOTAL_INVERTED);
-        break;
-    case 30:
+    }
+    else if (temp.compare("30")==0)
+    {
         tft.pushImage(155, 0, 85, 85, SHARP_LEFT);
-        break;
-    case 31:
+    }
+    else if (temp.compare("31")==0)
+    {
         tft.pushImage(155, 0, 85, 85, SHARP_RIGHT);
-        break;
-    case 32:
+    }
+    else if (temp.compare("32")==0)
+    {
         tft.pushImage(155, 0, 85, 85, SLIGHT_LEFT);
-        break;
-    case 33:
+    }
+    else if (temp.compare("33")==0)
+    {
         tft.pushImage(155, 0, 85, 85, SLIGHT_RIGHT);
-        break;
-    case 34:
+    }
+    else if (temp.compare("34")==0)
+    {
         tft.pushImage(155, 0, 85, 85, UNKNOWN);
-        Serial.println("YES");
-        break;
     }
 }

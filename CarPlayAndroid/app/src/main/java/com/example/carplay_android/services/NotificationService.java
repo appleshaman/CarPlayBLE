@@ -91,14 +91,14 @@ public class NotificationService extends NotificationListenerService {
         string = bundle.getString(Notification.EXTRA_TITLE);
         strings = string.split("-");
         if(strings.length  == 2){
-            informationMessage[2] = strings[0].trim();//Direction to somewhere
-            informationMessage[3] = strings[1].trim();//Time to next direction
+            informationMessage[2] = strings[1].trim();//Distance to next direction
+            informationMessage[3] = strings[0].trim();//Direction to somewhere
 
         }
         else if(strings.length  == 1){
             informationMessage[2] = strings[0].trim();//Direction to somewhere
-            informationMessage[3] = "N/A";//Time to next direction
-            bundle.putString("Direction",strings[0]);
+            informationMessage[3] = "N/A";//Distance to next direction
+
         }
 
         string = bundle.getString(Notification. EXTRA_SUB_TEXT);
@@ -107,7 +107,7 @@ public class NotificationService extends NotificationListenerService {
         informationMessage[5] = strings[1].trim();//Distance
         BitmapDrawable bitmapDrawable = (BitmapDrawable) sbn.getNotification().getLargeIcon().loadDrawable(getApplicationContext());
 
-        informationMessage[6] = DirectionUtils.getDirectionByComparing(bitmapDrawable.getBitmap());
+        informationMessage[6] = String.valueOf(DirectionUtils.getDirectionNumber(DirectionUtils.getDirectionByComparing(bitmapDrawable.getBitmap())));
 
         if(deviceStatus){
             if((!Arrays.equals(informationMessageSentLastTime, informationMessage))||

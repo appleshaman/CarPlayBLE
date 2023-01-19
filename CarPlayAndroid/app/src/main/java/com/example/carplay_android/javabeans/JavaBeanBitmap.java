@@ -24,4 +24,6 @@ public class JavaBeanBitmap implements Serializable {
     public String getBitmapName() {
         return bitmapName;
     }
+
+
 }
