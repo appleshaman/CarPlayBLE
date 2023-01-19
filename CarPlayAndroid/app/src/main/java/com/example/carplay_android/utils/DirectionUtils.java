@@ -75,4 +75,116 @@ public class DirectionUtils {
         }
         return "UNKNOWN";
     }
+
+    public static int getDirectionNumber(String direction) {
+        int directionNumber = 34;
+        switch (direction) {
+            case "ARRIVE":
+                directionNumber = 0;
+                break;
+            case "ARRIVE_LEFT":
+                directionNumber = 1;
+                break;
+            case "ARRIVE_RIGHT":
+                directionNumber = 2;
+                break;
+            case "CONTINUE_LEFT":
+                directionNumber = 3;
+                break;
+            case "CONTINUE_RETURN":
+                directionNumber = 4;
+                break;
+            case "CONTINUE_RIGHT":
+                directionNumber = 5;
+                break;
+            case "CONTINUE_SLIGHT_LEFT":
+                directionNumber = 6;
+                break;
+            case "CONTINUE_SLIGHT_RIGHT":
+                directionNumber = 7;
+                break;
+            case "CONTINUE_STRAIGHT":
+                directionNumber = 8;
+                break;
+            case "DEPART":
+                directionNumber = 9;
+                break;
+            case "FORK":
+                directionNumber = 10;
+                break;
+            case "POINTER":
+                directionNumber = 11;
+                break;
+            case "ROTATORY_EXIT":
+                directionNumber = 12;
+                break;
+            case "ROTATORY_EXIT_INVERTED":
+                directionNumber = 13;
+                break;
+            case "ROTATORY_LEFT":
+                directionNumber = 14;
+                break;
+            case "ROTATORY_LEFT_INVERTED":
+                directionNumber = 15;
+                break;
+            case "ROTATORY_RIGHT":
+                directionNumber = 16;
+                break;
+            case "ROTATORY_RIGHT_INVERTED":
+                directionNumber = 17;
+                break;
+            case "ROTATORY_SHARP_LEFT":
+                directionNumber = 18;
+                break;
+            case "ROTATORY_SHARP_LEFT_INVERTED":
+                directionNumber = 19;
+                break;
+            case "ROTATORY_SHARP_RIGHT":
+                directionNumber = 20;
+                break;
+            case "ROTATORY_SHARP_RIGHT_INVERTED":
+                directionNumber = 21;
+                break;
+            case "ROTATORY_SLIGHT_LEFT":
+                directionNumber = 22;
+                break;
+            case "ROTATORY_SLIGHT_LEFT_INVERTED":
+                directionNumber = 23;
+                break;
+            case "ROTATORY_SLIGHT_RIGHT":
+                directionNumber = 24;
+                break;
+            case "ROTATORY_SLIGHT_RIGHT_INVERTED":
+                directionNumber = 25;
+                break;
+            case "ROTATORY_STRAIGHT":
+                directionNumber = 26;
+                break;
+            case "ROTATORY_STRAIGHT_INVERTED":
+                directionNumber = 27;
+                break;
+            case "ROTATORY_TOTAL":
+                directionNumber = 28;
+                break;
+            case "ROTATORY_TOTAL_INVERTED":
+                directionNumber = 29;
+                break;
+            case "SHARP_LEFT":
+                directionNumber = 30;
+                break;
+            case "SHARP_RIGHT":
+                directionNumber = 31;
+                break;
+            case "SLIGHT_LEFT":
+                directionNumber = 32;
+                break;
+            case "SLIGHT_RIGHT":
+                directionNumber = 33;
+                break;
+            case "UNKNOWN":
+                directionNumber = 34;
+                break;
+        }
+        return directionNumber;
+    }
 }
