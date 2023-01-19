@@ -21,9 +21,13 @@ BLEService *pService;
 
 TFT_eSPI tft = TFT_eSPI();
 
+volatile long lastDebounceTime = 0;
+volatile bool debounce = true;
+volatile bool orientation = false;
 void setupScreen();
 void setupCharateristic();
 void drawDirectionImage(const char *direction);
+void buttonPressed();
 
 void setup()
 {
@@ -35,6 +39,8 @@ void setup()
 
     pServer = BLEDevice::createServer();
     pService = pServer->createService(SERVICE_UUID);
+    pinMode(GPIO_NUM_0, INPUT_PULLUP);
+    attachInterrupt(GPIO_NUM_0, buttonPressed, FALLING);
 
     setupCharateristic();
 
@@ -52,6 +58,12 @@ void setup()
 
 void loop()
 {
+
+     if ((millis() - lastDebounceTime) > 100)
+    {
+        debounce = true; //debounce
+    }
+
 
     delay(2000);
     tft.fillScreen(tft.color565(56, 178, 92)); // 0x38b25c
@@ -85,7 +97,7 @@ void loop()
 void setupScreen()
 {
     tft.init();
-    tft.setRotation(1);
+    tft.setRotation(3);
     
     tft.setTextColor(TFT_WHITE);
     tft.setSwapBytes(true);
@@ -274,5 +286,19 @@ void drawDirectionImage(const char *direction)
     else if (temp.compare("34")==0)
     {
         tft.pushImage(155, 0, 85, 85, UNKNOWN);
+    }
+}
+
+void IRAM_ATTR buttonPressed(){
+    
+    if(debounce){
+        lastDebounceTime = millis();
+        if(orientation){
+            tft.setRotation(1);
+            orientation = false;
+        }else{
+            tft.setRotation(3);
+            orientation = true;
+        }
     }
 }
