@@ -112,7 +112,18 @@ public class NotificationService extends NotificationListenerService {
         if(deviceStatus){
             if((!Arrays.equals(informationMessageSentLastTime, informationMessage))||
                     ((Arrays.equals(informationMessageSentLastTime, informationMessage))&&(ifSendNotification))){
-                controlBle.sendDestination(informationMessage[0]);
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(informationMessage[0].length() > 8){
+                            controlBle.sendDestination(informationMessage[0].substring(0, 8) + "..");//use 8 not 9 is to save one more letter for ".."
+                        }else{
+                            controlBle.sendDestination(informationMessage[0]);
+                        }
+
+                    }
+                },100);
+
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -123,7 +134,12 @@ public class NotificationService extends NotificationListenerService {
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        controlBle.sendDirection(informationMessage[2]);
+                        if(informationMessage[2].length() > 20){
+                            controlBle.sendDestination(informationMessage[2].substring(0, 20) + "..");
+                        }else{
+                            controlBle.sendDestination(informationMessage[2]);
+                        }
+
                     }
                 },100);
 
