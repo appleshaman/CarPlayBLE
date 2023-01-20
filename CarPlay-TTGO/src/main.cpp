@@ -5,7 +5,7 @@
 #include <TFT_eSPI.h>
 #include <Icons.h>
 #include <string.h>
-#include <sstream>
+
 
 #define SERVICE_UUID "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
 
@@ -59,7 +59,7 @@ void setup()
 void loop()
 {
 
-     if ((millis() - lastDebounceTime) > 100)
+    if ((millis() - lastDebounceTime) > 100)
     {
         debounce = true; //debounce
     }
@@ -86,11 +86,13 @@ void loop()
         tft.drawString("left", 100, 55, 4);
 
         drawDirectionImage(pService->getCharacteristic(DIRECTION_PRECISE_UUID)->getValue().c_str());
-        tft.drawString(pService->getCharacteristic(DIRECTION_DISTANCE_UUID)->getValue().c_str(), 175, 95, 4);
+        tft.drawString(pService->getCharacteristic(DIRECTION_DISTANCE_UUID)->getValue().c_str(), 175, 90, 4);
 
-        tft.drawString(pService->getCharacteristic(DIRECTION_UUID)->getValue().c_str(), 5, 90, 4);
+            //pService->getCharacteristic(DIRECTION_UUID)->getValue().substr
+        tft.drawString(pService->getCharacteristic(DESTINATION_UUID)->getValue().c_str(), 5, 90, 4);
+        tft.drawString(pService->getCharacteristic(DIRECTION_UUID)->getValue().c_str(), 5, 115, 4);
 
-        tft.drawString(pService->getCharacteristic(DESTINATION_UUID)->getValue().c_str(), 5, 115, 2);
+        
     }
 }
 
@@ -136,7 +138,7 @@ void setupCharateristic()
 
     destinationCharacteristic->setValue("destination");
     etaCharacteristic->setValue("00:00");
-    directionCharacteristic->setValue("direction");
+    directionCharacteristic->setValue("directionsdirections");
     directionDistanceCharacteristic->setValue("N/A");
     etaInMinutesCharacteristic->setValue("00 mins");
     distanceCharacteristic->setValue("100 km");
