@@ -121,7 +121,7 @@ public class BleService extends Service {
                 public void onDisConnected(boolean isActiveDisConnected, BleDevice device, BluetoothGatt gatt, int status) {
                     Log.d("s", "Disconnected");
                     BroadcastUtils.sendStatus(false, getFILTER_DEVICE_STATUS(), getApplicationContext());
-
+                    connectLeDevice(bleDeviceConnectTo);
                 }
             });
         }

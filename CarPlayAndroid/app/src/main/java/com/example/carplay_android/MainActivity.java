@@ -2,6 +2,7 @@ package com.example.carplay_android;
 
 import static com.example.carplay_android.javabeans.JavaBeanFilters.*;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
@@ -14,9 +15,13 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -91,6 +96,7 @@ public class MainActivity extends AppCompatActivity {
     private void init(){
         askPermission();
         initComponents();
+        getNotificationAccess();
         initBroadcastReceiver();
         initService();
     }
@@ -123,6 +129,7 @@ public class MainActivity extends AppCompatActivity {
                 "android.permission.ACCESS_FINE_LOCATION",
                 "android.permission.ACCESS_COARSE_LOCATION",
         };
+        requestIgnoreBatteryOptimizations();
         requestPermissions(permissions, 200);
     }
 
@@ -166,6 +173,58 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onServiceDisconnected(ComponentName name){
         }
+    }
+
+
+    private void getNotificationAccess() {
+
+        final String string = Settings.Secure.getString(getContentResolver(),
+                "enabled_notification_listeners");
+        if (string != null && !"".equals(string)) {
+
+            if (string.contains(getPackageName() + ".NotificationListener")) {
+                Log.d("d", "Nothing to do");
+            } else {
+                Log.d("d", "append xxx");
+                StringBuilder flatString = new StringBuilder(string);
+                flatString.append(getPackageName() + ".NotificationListener");
+                try {
+                    Settings.Secure.putString(getContentResolver(),
+                            "enabled_notification_listeners", flatString.toString());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        } else {
+            try {
+                Settings.Secure.putString(getContentResolver(),
+                        "enabled_notification_listeners",
+                        getPackageName() + ".NotificationListener");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    public void requestIgnoreBatteryOptimizations() {
+        boolean isIgnored = false;
+        PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        if (powerManager != null) {
+            isIgnored = powerManager.isIgnoringBatteryOptimizations(getPackageName());
+        }
+        if(!isIgnored){
+            try {
+                Intent intent = new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+                intent.setData(Uri.parse("package:" + getPackageName()));
+                startActivity(intent);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
     }
 
 

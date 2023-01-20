@@ -164,6 +164,8 @@ public class NotificationService extends NotificationListenerService {
         }
     }
 
+
+
     private void init(){
         initService();
         initBroadcastReceiver();
