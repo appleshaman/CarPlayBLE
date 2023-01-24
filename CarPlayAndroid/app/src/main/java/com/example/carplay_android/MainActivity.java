@@ -40,7 +40,7 @@ import java.lang.reflect.Type;
 public class MainActivity extends AppCompatActivity {
 
     private BleService.BleBinder controlBle;
-    private ServiceConnToNotification serviceConnToNotification;
+    private ServiceConnToBLE serviceConnToBLE;
 
     private Button buttonOpenNotification;
     private Button buttonScanNewDevice;
@@ -129,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
                 "android.permission.ACCESS_FINE_LOCATION",
                 "android.permission.ACCESS_COARSE_LOCATION",
         };
-        requestIgnoreBatteryOptimizations();
+        //requestIgnoreBatteryOptimizations();
         requestPermissions(permissions, 200);
     }
 
@@ -159,19 +159,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initService(){
-        serviceConnToNotification = new ServiceConnToNotification();
+        serviceConnToBLE = new ServiceConnToBLE();
         Intent intent = new Intent(this, BleService.class);
-        bindService(intent, serviceConnToNotification, BIND_AUTO_CREATE);
+        bindService(intent, serviceConnToBLE, BIND_AUTO_CREATE);
         startService(intent);//bind the service
+        requestIgnoreBatteryOptimizations();
     }
 
-    class ServiceConnToNotification implements ServiceConnection {
+    class ServiceConnToBLE implements ServiceConnection {
         @Override
         public void onServiceConnected(ComponentName name, IBinder iBinder){
             controlBle = (BleService.BleBinder)iBinder;
         }
         @Override
         public void onServiceDisconnected(ComponentName name){
+            initService();
         }
     }
 
@@ -292,7 +294,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unbindService(serviceConnToNotification);
+        unbindService(serviceConnToBLE);
     }
 }
 

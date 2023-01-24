@@ -135,9 +135,9 @@ public class NotificationService extends NotificationListenerService {
                     @Override
                     public void run() {
                         if(informationMessage[2].length() > 20){
-                            controlBle.sendDestination(informationMessage[2].substring(0, 20) + "..");
+                            controlBle.sendDirection(informationMessage[2].substring(0, 20) + "..");
                         }else{
-                            controlBle.sendDestination(informationMessage[2]);
+                            controlBle.sendDirection(informationMessage[2]);
                         }
 
                     }
