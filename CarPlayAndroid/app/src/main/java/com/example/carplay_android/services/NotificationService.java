@@ -36,7 +36,7 @@ public class NotificationService extends NotificationListenerService {
     private Boolean deviceStatus = false;
     private Timer timerSendNotification;
     private Boolean ifSendNotification = false;
-    private String[] informationMessageSentLastTime = new String[6];
+    private String[] informationMessageSentLastTime = new String[7];
 
     public NotificationService() {
 
@@ -77,7 +77,10 @@ public class NotificationService extends NotificationListenerService {
 
     private void handleGMapNotification (StatusBarNotification sbn){
         Bundle bundle = sbn.getNotification().extras;
+
         String[] informationMessage = new String[7];
+
+
         String string = bundle.getString(Notification.EXTRA_TEXT);
         String[] strings = string.split("-");//destination
         informationMessage[0] = strings[0].trim();
@@ -110,66 +113,85 @@ public class NotificationService extends NotificationListenerService {
         informationMessage[6] = String.valueOf(DirectionUtils.getDirectionNumber(DirectionUtils.getDirectionByComparing(bitmapDrawable.getBitmap())));
 
         if(deviceStatus){
-            if((!Arrays.equals(informationMessageSentLastTime, informationMessage))||
-                    ((Arrays.equals(informationMessageSentLastTime, informationMessage))&&(ifSendNotification))){
+            if(!informationMessage[0].equals(informationMessageSentLastTime[0])) {
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        if(informationMessage[0].length() > 8){
+
+                        if (informationMessage[0].length() > 8) {
                             controlBle.sendDestination(informationMessage[0].substring(0, 8) + "..");//use 8 not 9 is to save one more letter for ".."
-                        }else{
+                        } else {
                             controlBle.sendDestination(informationMessage[0]);
                         }
 
                     }
-                },100);
+                }, 100);
+                informationMessageSentLastTime[0] = informationMessage[0];
+            }
 
+            if(!Objects.equals(informationMessage[1], informationMessageSentLastTime[1])) {
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         controlBle.sendEta(informationMessage[1]);
                     }
-                },100);
+                }, 100);
+                informationMessageSentLastTime[1] = informationMessage[1];
+            }
 
+            if(!Objects.equals(informationMessage[2], informationMessageSentLastTime[2])) {
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        if(informationMessage[2].length() > 20){
+                        if (informationMessage[2].length() > 20) {
                             controlBle.sendDirection(informationMessage[2].substring(0, 20) + "..");
-                        }else{
+                        } else {
                             controlBle.sendDirection(informationMessage[2]);
                         }
 
                     }
-                },100);
+                }, 100);
+                informationMessageSentLastTime[2] = informationMessage[2];
+            }
 
+            if(!Objects.equals(informationMessage[3], informationMessageSentLastTime[3])) {
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        controlBle.sendDirectionDistances(informationMessage[3]);
+                            controlBle.sendDirectionDistances(informationMessage[3]);
                     }
-                },100);
-
+                }, 100);
+                informationMessageSentLastTime[3] = informationMessage[3];
+            }
+            if(!Objects.equals(informationMessage[4], informationMessageSentLastTime[4])) {
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         controlBle.sendEtaInMinutes(informationMessage[4]);
                     }
-                },100);
+                }, 100);
+                informationMessageSentLastTime[4] = informationMessage[4];
+            }
 
+            if(!Objects.equals(informationMessage[5], informationMessageSentLastTime[5])) {
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         controlBle.sendDistance(informationMessage[5]);
                     }
-                },100);
+                }, 100);
+                informationMessageSentLastTime[5] = informationMessage[5];
+            }
 
+            if(!Objects.equals(informationMessage[6], informationMessageSentLastTime[6])) {
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         controlBle.sendDirectionPrecise(informationMessage[6]);
                     }
-                },100);
+                }, 100);
+                informationMessageSentLastTime[6] = informationMessage[6];
+            }
                 Log.d("d","done");
                 informationMessageSentLastTime = informationMessage;
                 ifSendNotification = false;//reduce the frequency of sending messages
@@ -177,7 +199,7 @@ public class NotificationService extends NotificationListenerService {
                 //because if the device lost connection before, we have to keep send message to it to keep it does not
                 //receive any wrong message.
             }
-        }
+
     }
 
 
