@@ -154,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
         localBroadcastManager.registerReceiver(receiverForNotificationStatus, intentFilter);
 
         intentFilter = new IntentFilter(getFILTER_DEVICE_STATUS());
-        ReceiverForDeviceUsed receiverForDeviceStatus = new ReceiverForDeviceUsed();
+        ReceiverForDeviceStatus receiverForDeviceStatus = new ReceiverForDeviceStatus();
         localBroadcastManager.registerReceiver(receiverForDeviceStatus, intentFilter);
     }
 

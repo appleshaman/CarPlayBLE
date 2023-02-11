@@ -108,7 +108,6 @@ public class BleService extends Service {
                 @Override
                 public void onConnectSuccess(BleDevice bleDevice, BluetoothGatt gatt, int status) {
                     Log.d("s", "Connect success");
-
                     BroadcastUtils.sendStatus(true, getFILTER_DEVICE_STATUS(), getApplicationContext());
                     bleDeviceConnectTo = bleDevice;
 
