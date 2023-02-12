@@ -83,13 +83,11 @@ public class BleService extends Service {
             BleManager.getInstance().setMtu(bleDevice, 512, new BleMtuChangedCallback() {
                 @Override
                 public void onSetMTUFailure(BleException exception) {
-                    // 设置MTU失败
                     int a = 2;
                 }
 
                 @Override
                 public void onMtuChanged(int mtu) {
-                    // 设置MTU成功，并获得当前设备传输支持的MTU值
                     int a = mtu;
                 }
             });
@@ -110,7 +108,6 @@ public class BleService extends Service {
                 @Override
                 public void onConnectSuccess(BleDevice bleDevice, BluetoothGatt gatt, int status) {
                     Log.d("s", "Connect success");
-
                     BroadcastUtils.sendStatus(true, getFILTER_DEVICE_STATUS(), getApplicationContext());
                     bleDeviceConnectTo = bleDevice;
 
@@ -156,7 +153,6 @@ public class BleService extends Service {
         }
 
         private void sendToDevice(String informationMessage, String uuid) {
-
             String uuid_service = "4fafc201-1fb5-459e-8fcc-c5c9c331914b";
             byte[] data = informationMessage.getBytes();
             BleManager.getInstance().write(

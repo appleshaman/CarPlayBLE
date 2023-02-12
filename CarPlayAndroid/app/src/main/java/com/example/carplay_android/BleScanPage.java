@@ -65,6 +65,8 @@ public class BleScanPage extends AppCompatActivity {
             }
         });
 
+        scanLeDevice(getApplicationContext());
+
 
         buttonScan.setOnClickListener(new View.OnClickListener() {
             @Override
