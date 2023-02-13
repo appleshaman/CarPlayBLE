@@ -17,7 +17,7 @@ Once the device is connected, you can see the changes on the ESP32's screen and 
 <img src="https://github.com/appleshaman/CarPlayBLE/blob/main/docs/3.jpg" width = "300"><br>
 After you connect to the device, you can start to use Google map app to navigate, the navigation information would be sent to the ESP32 automatically.
 Here is the explaination to each line of the information displayed.<br>
-<img src="https://github.com/appleshaman/CarPlayBLE/blob/main/docs/5.jpg" width = "300"><br>
+<img src="https://github.com/appleshaman/CarPlayBLE/blob/main/docs/5.jpg" width = "500"><br>
 1. Estimated time of arrival<br>
 2. Minutes left before arrive<br>
 3. Distance left before arrive<br>
