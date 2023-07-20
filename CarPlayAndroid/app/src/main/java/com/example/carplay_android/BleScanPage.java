@@ -61,7 +61,6 @@ public class BleScanPage extends AppCompatActivity {
                 }else{
                     connectDevice();
                 }
-
             }
         });
 
@@ -111,7 +110,7 @@ public class BleScanPage extends AppCompatActivity {
         startService(intent);//bind the service
     }
 
-    private void connectDevice(){
+    private void connectDevice(){//try to connect a device
         if(deviceSelected == null){
             CharSequence text = "No device selected";
             int duration = Toast.LENGTH_SHORT;

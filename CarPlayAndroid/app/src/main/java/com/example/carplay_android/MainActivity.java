@@ -29,12 +29,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.clj.fastble.data.BleDevice;
-import com.example.carplay_android.javabeans.JavaBeanDevice;
 import com.example.carplay_android.services.BleService;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
-import java.lang.reflect.Type;
 
 
 public class MainActivity extends AppCompatActivity {
