@@ -5,6 +5,7 @@
 #include <TFT_eSPI.h>
 #include <Icons.h>
 #include <string.h>
+#include "Information.h"
 
 #define SERVICE_UUID "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
 
@@ -15,6 +16,17 @@
 #define ETA_MINUTES_UUID "563c187d-ff17-4a6a-8061-ca9b7b70b2b0"
 #define DISTANCE_UUID "8bf31540-eb0d-476c-b233-f514678d2afb"
 #define DIRECTION_PRECISE_UUID "a602346d-c2bb-4782-8ea7-196a11f85113"
+
+
+
+Information destination( "destination");
+Information ETA("00:00");
+Information direction("directionsdirections");
+Information directionDistance( "N/A");
+Information ETA_Minute("00 mins");
+Information distance( "100 km");
+Information directionPrecise( "34");
+
 BLEServer *pServer;
 BLEService *pService;
 
@@ -28,24 +40,61 @@ void setupCharateristic();
 void drawDirectionImage(const char *direction);
 void buttonPressed();
 
+bool ifConnected = false;
+bool ifConnectionStateChange = true;
+
+class MyCallback : public BLECharacteristicCallbacks
+{
+    void onWrite(BLECharacteristic *pCharacteristic)
+    {
+        if (pCharacteristic->getUUID().toString() == DESTINATION_UUID)
+        {
+            destination.setString(pCharacteristic->getValue().c_str());
+        }
+        if (pCharacteristic->getUUID().toString() == ETA_UUID)
+        {
+            ETA.setString(pCharacteristic->getValue().c_str());
+        }
+        if (pCharacteristic->getUUID().toString() == DIRECTION_UUID)
+        {
+            direction.setString(pCharacteristic->getValue().c_str());
+        }
+        if (pCharacteristic->getUUID().toString() == DIRECTION_DISTANCE_UUID)
+        {
+            directionDistance.setString(pCharacteristic->getValue().c_str());
+        }
+        if (pCharacteristic->getUUID().toString() == ETA_MINUTES_UUID)
+        {
+            ETA_Minute.setString(pCharacteristic->getValue().c_str());
+        }
+        if (pCharacteristic->getUUID().toString() == DISTANCE_UUID)
+        {
+            distance.setString(pCharacteristic->getValue().c_str());
+        }
+        if (pCharacteristic->getUUID().toString() == DIRECTION_PRECISE_UUID)
+        {
+            directionPrecise.setString(pCharacteristic->getValue().c_str());
+        }
+    }
+};
+
 void setup()
 {
     Serial.begin(921600);
     Serial.println("Start!");
     setupScreen();
+    BLEDevice::init("Navigator"); // Navigator is the name displayed on the device list
 
-    BLEDevice::init("Navigator");
+    tft.fillScreen(tft.color565(56, 178, 92)); // 0x38b25c
 
     pServer = BLEDevice::createServer();
     pService = pServer->createService(SERVICE_UUID);
     pinMode(GPIO_NUM_0, INPUT_PULLUP);
     attachInterrupt(GPIO_NUM_0, buttonPressed, FALLING);
-
     setupCharateristic();
 
     pService->start();
 
-    
     Serial.println("Characteristic defined!");
 }
 
@@ -57,38 +106,76 @@ void loop()
         debounce = true; // debounce
     }
 
-    delay(2000);
-    tft.fillScreen(tft.color565(56, 178, 92)); // 0x38b25c
+    // delay(2000);
 
-    if (pServer->getConnectedCount() == 0)
+    if ((pServer->getConnectedCount() == 0) && (ifConnected))
+    { // confirm if has been connected
+        ifConnected = false;
+        ifConnectionStateChange = true;
+        tft.fillScreen(tft.color565(56, 178, 92)); // clean the screen if state changes
+    }
+    else if ((!pServer->getConnectedCount() == 0) && (!ifConnected))
     {
-        BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
-        pAdvertising->addServiceUUID(SERVICE_UUID);
-        pAdvertising->setScanResponse(true);
-        pAdvertising->setMinPreferred(0x06); // functions that help with iPhone connections issue
-        pAdvertising->setMinPreferred(0x12);
-        BLEDevice::startAdvertising();
-        
-        tft.pushImage(77, 10, 85, 85, NO_CONNECTION);
-        tft.drawString("No Connection", 30, 95, 4);
+        ifConnected = true;
+        ifConnectionStateChange = true;
+        tft.fillScreen(tft.color565(56, 178, 92)); // clean the screen if state changes
+    }
+
+    if (!ifConnected)
+    {
+        if (ifConnectionStateChange)
+        {
+            BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
+            pAdvertising->addServiceUUID(SERVICE_UUID);
+            pAdvertising->setScanResponse(true);
+            pAdvertising->setMinPreferred(0x06); // functions that help with iPhone connections issue
+            pAdvertising->setMinPreferred(0x12);
+            BLEDevice::startAdvertising();
+
+            tft.pushImage(77, 10, 85, 85, NO_CONNECTION);
+            tft.drawString("No Connection", 30, 95, 4);
+
+            ifConnectionStateChange = false; // make code above only runs once without change state of connection
+        }
     }
     else
     {
-        tft.drawString("ETA:", 5, 5, 4);
-        tft.drawString(pService->getCharacteristic(ETA_UUID)->getValue().c_str(), 70, 5, 4);
-
-        tft.drawString(pService->getCharacteristic(ETA_MINUTES_UUID)->getValue().c_str(), 5, 30, 4);
-        tft.drawString("left", 100, 30, 4);
-
-        tft.drawString(pService->getCharacteristic(DISTANCE_UUID)->getValue().c_str(), 5, 55, 4);
-        tft.drawString("left", 100, 55, 4);
-
-        drawDirectionImage(pService->getCharacteristic(DIRECTION_PRECISE_UUID)->getValue().c_str());
-        tft.drawString(pService->getCharacteristic(DIRECTION_DISTANCE_UUID)->getValue().c_str(), 175, 90, 4);
-
-        // pService->getCharacteristic(DIRECTION_UUID)->getValue().substr
-        tft.drawString(pService->getCharacteristic(DESTINATION_UUID)->getValue().c_str(), 5, 90, 4);
-        tft.drawString(pService->getCharacteristic(DIRECTION_UUID)->getValue().c_str(), 5, 115, 4);
+        if (ifConnectionStateChange)
+        {
+            tft.drawString("ETA:", 5, 5, 4);
+            tft.drawString("left", 100, 30, 4);
+            tft.drawString("left", 100, 55, 4);
+            ifConnectionStateChange = false;
+        }
+        tft.setTextPadding(10);
+        if (ETA.getBoolean())
+        {Serial.print("ETA "); Serial.println(ETA.getString());
+            tft.drawString(ETA.getString(), 70, 5, 4);
+        }
+        if (ETA_Minute.getBoolean())
+        {
+            tft.drawString(ETA_Minute.getString(), 5, 30, 4);
+        }
+        if (distance.getBoolean())
+        {
+            tft.drawString(distance.getString(), 5, 55, 4);
+        }
+        if (directionPrecise.getBoolean())
+        {Serial.print("Direction "); Serial.println(directionPrecise.getString());
+            drawDirectionImage(directionPrecise.getString());
+        }
+        if (directionDistance.getBoolean())
+        {
+            tft.drawString(directionDistance.getString(), 175, 90, 4);
+        }
+        if (destination.getBoolean())
+        {
+            tft.drawString(destination.getString(), 5, 90, 4);
+        }
+        if (direction.getBoolean())
+        {
+            tft.drawString(direction.getString(), 5, 115, 4);
+        }
     }
 }
 
@@ -96,12 +183,12 @@ void setupScreen()
 {
     tft.init();
     tft.setRotation(3);
-
-    tft.setTextColor(TFT_WHITE);
     tft.setSwapBytes(true);
+    tft.setTextColor(TFT_WHITE, tft.color565(56, 178, 92));
+    //tft.setTextColor(TFT_WHITE, TFT_RED);
 }
 
-void setupCharateristic()
+void setupCharateristic() // this is only be done by once
 {
     BLECharacteristic *destinationCharacteristic = pService->createCharacteristic(
         DESTINATION_UUID,
@@ -132,13 +219,15 @@ void setupCharateristic()
         BLECharacteristic::PROPERTY_READ |
             BLECharacteristic::PROPERTY_WRITE);
 
-    destinationCharacteristic->setValue("destination");
-    etaCharacteristic->setValue("00:00");
-    directionCharacteristic->setValue("directionsdirections");
-    directionDistanceCharacteristic->setValue("N/A");
-    etaInMinutesCharacteristic->setValue("00 mins");
-    distanceCharacteristic->setValue("100 km");
-    directionPreciseCharacteristic->setValue("34");
+    MyCallback *myCallback = new MyCallback();
+
+    destinationCharacteristic->setCallbacks(myCallback);
+    etaCharacteristic->setCallbacks(myCallback);
+    directionCharacteristic->setCallbacks(myCallback);
+    directionDistanceCharacteristic->setCallbacks(myCallback);
+    etaInMinutesCharacteristic->setCallbacks(myCallback);
+    distanceCharacteristic->setCallbacks(myCallback);
+    directionPreciseCharacteristic->setCallbacks(myCallback);
 }
 
 void drawDirectionImage(const char *direction)

@@ -12,6 +12,7 @@
                 "e:/CarPlayBLE/CarPlay-TTGO/src",
                 "e:/CarPlayBLE/CarPlay-TTGO/lib/Icons",
                 "C:/Users/unite/.platformio/packages/framework-arduinoespressif32/libraries/BLE/src",
+                "e:/CarPlayBLE/CarPlay-TTGO/lib/Information",
                 "e:/CarPlayBLE/CarPlay-TTGO/.pio/libdeps/ttgo-lora32-v1/TFT_eSPI",
                 "C:/Users/unite/.platformio/packages/framework-arduinoespressif32/libraries/LittleFS/src",
                 "C:/Users/unite/.platformio/packages/framework-arduinoespressif32/libraries/SPIFFS/src",
@@ -224,6 +225,7 @@
                     "e:/CarPlayBLE/CarPlay-TTGO/src",
                     "e:/CarPlayBLE/CarPlay-TTGO/lib/Icons",
                     "C:/Users/unite/.platformio/packages/framework-arduinoespressif32/libraries/BLE/src",
+                    "e:/CarPlayBLE/CarPlay-TTGO/lib/Information",
                     "e:/CarPlayBLE/CarPlay-TTGO/.pio/libdeps/ttgo-lora32-v1/TFT_eSPI",
                     "C:/Users/unite/.platformio/packages/framework-arduinoespressif32/libraries/LittleFS/src",
                     "C:/Users/unite/.platformio/packages/framework-arduinoespressif32/libraries/SPIFFS/src",
@@ -431,7 +433,7 @@
                 ]
             },
             "defines": [
-                "PLATFORMIO=60106",
+                "PLATFORMIO=60109",
                 "ARDUINO_TTGO_LoRa32_V1",
                 "HAVE_CONFIG_H",
                 "MBEDTLS_CONFIG_FILE=\"mbedtls/esp_config.h\"",
@@ -450,8 +452,8 @@
                 "ARDUINO_PARTITION_my_memsettings",
                 ""
             ],
-            "cStandard": "c99",
-            "cppStandard": "c++11",
+            "cStandard": "gnu99",
+            "cppStandard": "gnu++11",
             "compilerPath": "C:/Users/unite/.platformio/packages/toolchain-xtensa-esp32/bin/xtensa-esp32-elf-gcc.exe",
             "compilerArgs": [
                 "-mlongcalls",
