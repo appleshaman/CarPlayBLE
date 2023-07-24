@@ -117,8 +117,9 @@ public class BleScanPage extends AppCompatActivity {
             Toast toast = Toast.makeText(getApplicationContext(), text, duration);
             toast.show();
         }else{
-            controlBle.setMtu(deviceSelected);
+
             controlBle.connectLeDevice(deviceSelected);
+            controlBle.setMtu(deviceSelected);
             //BroadcastUtils.sendBleDevice(deviceSelected,getFILTER_DEVICE_USED(), getApplicationContext());//send this device to main page
         }
     }

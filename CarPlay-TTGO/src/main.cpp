@@ -17,15 +17,13 @@
 #define DISTANCE_UUID "8bf31540-eb0d-476c-b233-f514678d2afb"
 #define DIRECTION_PRECISE_UUID "a602346d-c2bb-4782-8ea7-196a11f85113"
 
-
-
-Information destination( "destination");
+Information destination("destination");
 Information ETA("00:00");
 Information direction("directionsdirections");
-Information directionDistance( "N/A");
-Information ETA_Minute("00 mins");
-Information distance( "100 km");
-Information directionPrecise( "34");
+Information directionDistance("N/A");
+Information ETA_Minute("00 min");
+Information distance("100");
+Information directionPrecise("34");
 
 BLEServer *pServer;
 BLEService *pService;
@@ -75,6 +73,10 @@ class MyCallback : public BLECharacteristicCallbacks
         {
             directionPrecise.setString(pCharacteristic->getValue().c_str());
         }
+    }
+    void onMtuChanged(BLEServer *pServer, uint16_t mtu)
+    {
+        Serial.printf("MTU changed to %d\n", mtu);
     }
 };
 
@@ -149,32 +151,45 @@ void loop()
         }
         tft.setTextPadding(10);
         if (ETA.getBoolean())
-        {Serial.print("ETA "); Serial.println(ETA.getString());
+        {
+            ETA.setBoolean(false);
             tft.drawString(ETA.getString(), 70, 5, 4);
         }
         if (ETA_Minute.getBoolean())
         {
+            ETA_Minute.setBoolean(false);
+            tft.setTextPadding(75);
             tft.drawString(ETA_Minute.getString(), 5, 30, 4);
         }
         if (distance.getBoolean())
         {
+            distance.setBoolean(false);
+            tft.setTextPadding(70);
             tft.drawString(distance.getString(), 5, 55, 4);
         }
         if (directionPrecise.getBoolean())
-        {Serial.print("Direction "); Serial.println(directionPrecise.getString());
+        {
+            directionPrecise.setBoolean(false);
             drawDirectionImage(directionPrecise.getString());
         }
         if (directionDistance.getBoolean())
-        {
+        {   
+            tft.setTextPadding(70);
             tft.drawString(directionDistance.getString(), 175, 90, 4);
         }
         if (destination.getBoolean())
-        {
+        {   Serial.println(destination.getString());
+            destination.setBoolean(false);
+            tft.setTextPadding(150);
             tft.drawString(destination.getString(), 5, 90, 4);
+            tft.setTextPadding(10);
         }
         if (direction.getBoolean())
         {
+            direction.setBoolean(false);
+            tft.setTextPadding(240);
             tft.drawString(direction.getString(), 5, 115, 4);
+            tft.setTextPadding(10);
         }
     }
 }
@@ -185,7 +200,7 @@ void setupScreen()
     tft.setRotation(3);
     tft.setSwapBytes(true);
     tft.setTextColor(TFT_WHITE, tft.color565(56, 178, 92));
-    //tft.setTextColor(TFT_WHITE, TFT_RED);
+    // tft.setTextColor(TFT_WHITE, TFT_RED);
 }
 
 void setupCharateristic() // this is only be done by once
