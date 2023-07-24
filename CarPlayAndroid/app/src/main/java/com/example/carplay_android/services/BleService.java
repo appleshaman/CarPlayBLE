@@ -51,7 +51,7 @@ public class BleService extends Service {
 
     }
 
-    public void setBTCheckTimer() {
+    public void setBTCheckTimer() {// check the bt state every second
         if (timerBTState == null) {
             timerBTState = new Timer();
             TimerTask timerTask = new TimerTask() {
@@ -80,15 +80,14 @@ public class BleService extends Service {
             return BleService.this;
         }
         public void setMtu(BleDevice bleDevice){
-            BleManager.getInstance().setMtu(bleDevice, 512, new BleMtuChangedCallback() {
+            BleManager.getInstance().setMtu(bleDevice, 200, new BleMtuChangedCallback() {
                 @Override
                 public void onSetMTUFailure(BleException exception) {
-                    int a = 2;
+                    Log.d("a", "MTUFailed");
                 }
 
                 @Override
                 public void onMtuChanged(int mtu) {
-                    int a = mtu;
                 }
             });
         }
@@ -110,7 +109,7 @@ public class BleService extends Service {
                     Log.d("s", "Connect success");
                     BroadcastUtils.sendStatus(true, getFILTER_DEVICE_STATUS(), getApplicationContext());
                     bleDeviceConnectTo = bleDevice;
-
+                    NotificationService.cleanLastTimeSent();
 
                 }
 
@@ -155,11 +154,13 @@ public class BleService extends Service {
         private void sendToDevice(String informationMessage, String uuid) {
             String uuid_service = "4fafc201-1fb5-459e-8fcc-c5c9c331914b";
             byte[] data = informationMessage.getBytes();
+
             BleManager.getInstance().write(
                     bleDeviceConnectTo,
                     uuid_service,
                     uuid,
                     data,
+                    false,
                     new BleWriteCallback() {
                         @Override
                         public void onWriteSuccess(int current, int total, byte[] justWrite) {
@@ -168,7 +169,6 @@ public class BleService extends Service {
 
                         @Override
                         public void onWriteFailure(BleException exception) {
-                            // 发送数据到设备失败
                             Log.d("1", "Failed to send");
                             new Handler().postDelayed(new Runnable() {
                                 @Override

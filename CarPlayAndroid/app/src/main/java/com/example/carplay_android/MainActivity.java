@@ -30,7 +30,7 @@ import android.widget.Toast;
 
 import com.clj.fastble.data.BleDevice;
 import com.example.carplay_android.services.BleService;
-
+import com.example.carplay_android.services.NotificationService;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -60,12 +60,12 @@ public class MainActivity extends AppCompatActivity {
 
         buttonOpenNotification.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(View view) {//open the settings for turn on notification
                 startActivity(new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS));
             }
         });
 
-        buttonConnectToOld.setOnClickListener(new View.OnClickListener() {
+        buttonConnectToOld.setOnClickListener(new View.OnClickListener() {//connect to previous device
             @Override
             public void onClick(View view) {
                 if(deviceUsed == null){
@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        buttonScanNewDevice.setOnClickListener(new View.OnClickListener() {
+        buttonScanNewDevice.setOnClickListener(new View.OnClickListener() {//scan new device
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getApplicationContext(), BleScanPage.class);
@@ -92,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
     private void init(){
         askPermission();
         initComponents();
-        getNotificationAccess();
+//        isNotificationServiceRunning();
         initBroadcastReceiver();
         initService();
     }
@@ -174,35 +174,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void getNotificationAccess() {
+//    private void ensureNotificationServiceRunning() {
+//        String enabledListeners = Settings.Secure.getString(
+//                getContentResolver(),
+//                "enabled_notification_listeners");
+//
+//        if (enabledListeners == null || !enabledListeners.contains(getPackageName())) {
+//            Intent intent = new Intent(this, NotificationService.class);
+//            startService(intent);
+//            bindService(intent, serviceConnection, BIND_AUTO_CREATE);
+//        }
+//    }
 
-        final String string = Settings.Secure.getString(getContentResolver(),
-                "enabled_notification_listeners");
-        if (string != null && !"".equals(string)) {
 
-            if (string.contains(getPackageName() + ".NotificationListener")) {
-                Log.d("d", "Nothing to do");
-            } else {
-                Log.d("d", "append xxx");
-                StringBuilder flatString = new StringBuilder(string);
-                flatString.append(getPackageName() + ".NotificationListener");
-                try {
-                    Settings.Secure.putString(getContentResolver(),
-                            "enabled_notification_listeners", flatString.toString());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        } else {
-            try {
-                Settings.Secure.putString(getContentResolver(),
-                        "enabled_notification_listeners",
-                        getPackageName() + ".NotificationListener");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
+
 
 
 

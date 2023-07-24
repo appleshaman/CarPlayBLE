@@ -36,12 +36,11 @@ public class NotificationService extends NotificationListenerService {
     private Boolean deviceStatus = false;
     private Timer timerSendNotification;
     private Boolean ifSendNotification = false;
-    private String[] informationMessageSentLastTime = new String[7];
+    private static String[] informationMessageSentLastTime = new String[7];
 
     public NotificationService() {
 
     }
-
 
 
     @Override
@@ -54,7 +53,7 @@ public class NotificationService extends NotificationListenerService {
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
         super.onNotificationPosted(sbn);
-        if (sbn != null && isGMapNotification(sbn)){
+        if (sbn != null && isGMapNotification(sbn)) {
             handleGMapNotification(sbn);
         }
     }
@@ -62,20 +61,23 @@ public class NotificationService extends NotificationListenerService {
     @Override
     public void onNotificationRemoved(StatusBarNotification sbn) {
         super.onNotificationRemoved(sbn);
-        Log.d("Notification","removed");
+        Log.d("Notification", "removed");
+    }
+
+    public static void cleanLastTimeSent() {
+        Arrays.fill(informationMessageSentLastTime, "");
     }
 
 
-
-    private boolean isGMapNotification(StatusBarNotification sbn){
-        if(!sbn.isOngoing() || !sbn.getPackageName().contains("com.google.android.apps.maps")){
+    private boolean isGMapNotification(StatusBarNotification sbn) {
+        if (!sbn.isOngoing() || !sbn.getPackageName().contains("com.google.android.apps.maps")) {
             return false;
         }
         return (sbn.getId() == 1);
     }
 
 
-    private void handleGMapNotification (StatusBarNotification sbn){
+    private void handleGMapNotification(StatusBarNotification sbn) {
         Bundle bundle = sbn.getNotification().extras;
 
         String[] informationMessage = new String[7];
@@ -85,7 +87,7 @@ public class NotificationService extends NotificationListenerService {
         String[] strings = string.split("-");//destination
         informationMessage[0] = strings[0].trim();
         strings = strings[1].trim().split(" ");
-        if(strings.length == 3){
+        if (strings.length == 3) {
             strings[0] = strings[0] + " ";//concat a " "
             strings[0] = strings[0] + strings[1];//if use 12 hour type, then concat the time and AM/PM
         }
@@ -93,18 +95,17 @@ public class NotificationService extends NotificationListenerService {
 
         string = bundle.getString(Notification.EXTRA_TITLE);
         strings = string.split("-");
-        if(strings.length  == 2){
+        if (strings.length == 2) {
             informationMessage[2] = strings[1].trim();//Distance to next direction
             informationMessage[3] = strings[0].trim();//Direction to somewhere
 
-        }
-        else if(strings.length  == 1){
+        } else if (strings.length == 1) {
             informationMessage[2] = strings[0].trim();//Direction to somewhere
             informationMessage[3] = "N/A";//Distance to next direction
 
         }
 
-        string = bundle.getString(Notification. EXTRA_SUB_TEXT);
+        string = bundle.getString(Notification.EXTRA_SUB_TEXT);
         strings = string.split("·");
         informationMessage[4] = strings[0].trim();//ETA in Minutes
         informationMessage[5] = strings[1].trim();//Distance
@@ -112,99 +113,72 @@ public class NotificationService extends NotificationListenerService {
 
         informationMessage[6] = String.valueOf(DirectionUtils.getDirectionNumber(DirectionUtils.getDirectionByComparing(bitmapDrawable.getBitmap())));
 
-        if(deviceStatus){
-            if(!informationMessage[0].equals(informationMessageSentLastTime[0])) {
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
+        if (deviceStatus) {
+            if (!informationMessage[0].equals(informationMessageSentLastTime[0])) {//destination
 
-                        if (informationMessage[0].length() > 8) {
-                            controlBle.sendDestination(informationMessage[0].substring(0, 8) + "..");//use 8 not 9 is to save one more letter for ".."
-                        } else {
-                            controlBle.sendDestination(informationMessage[0]);
-                        }
-
-                    }
-                }, 100);
+//                if (informationMessage[0].length() > 8) {
+//                    controlBle.sendDestination(informationMessage[0].substring(0, 8) + "..");//use 8 not 9 is to save one more letter for ".."
+//                } else {
+                    controlBle.sendDestination(informationMessage[0]);
+                //}
                 informationMessageSentLastTime[0] = informationMessage[0];
             }
+            if (!Objects.equals(informationMessage[1], informationMessageSentLastTime[1])) {//ETA
 
-            if(!Objects.equals(informationMessage[1], informationMessageSentLastTime[1])) {
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        controlBle.sendEta(informationMessage[1]);
-                    }
-                }, 100);
+
+                controlBle.sendEta(informationMessage[1]);
+
+
                 informationMessageSentLastTime[1] = informationMessage[1];
             }
+            if (!Objects.equals(informationMessage[2], informationMessageSentLastTime[2])) {//direction
 
-            if(!Objects.equals(informationMessage[2], informationMessageSentLastTime[2])) {
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (informationMessage[2].length() > 20) {
-                            controlBle.sendDirection(informationMessage[2].substring(0, 20) + "..");
-                        } else {
-                            controlBle.sendDirection(informationMessage[2]);
-                        }
+                if (informationMessage[2].length() > 20) {
+                    controlBle.sendDirection(informationMessage[2].substring(0, 20) + "..");
+                } else {
+                    controlBle.sendDirection(informationMessage[2]);
+                }
 
-                    }
-                }, 100);
                 informationMessageSentLastTime[2] = informationMessage[2];
             }
+            if (!Objects.equals(informationMessage[3], informationMessageSentLastTime[3])) {
 
-            if(!Objects.equals(informationMessage[3], informationMessageSentLastTime[3])) {
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                            controlBle.sendDirectionDistances(informationMessage[3]);
-                    }
-                }, 100);
+                controlBle.sendDirectionDistances(informationMessage[3]);
+
                 informationMessageSentLastTime[3] = informationMessage[3];
             }
-            if(!Objects.equals(informationMessage[4], informationMessageSentLastTime[4])) {
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        controlBle.sendEtaInMinutes(informationMessage[4]);
-                    }
-                }, 100);
+            if (!Objects.equals(informationMessage[4], informationMessageSentLastTime[4])) {
+
+                controlBle.sendEtaInMinutes(informationMessage[4]);
+
                 informationMessageSentLastTime[4] = informationMessage[4];
             }
+            if (!Objects.equals(informationMessage[5], informationMessageSentLastTime[5])) {
 
-            if(!Objects.equals(informationMessage[5], informationMessageSentLastTime[5])) {
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        controlBle.sendDistance(informationMessage[5]);
-                    }
-                }, 100);
+                controlBle.sendDistance(informationMessage[5]);
+
                 informationMessageSentLastTime[5] = informationMessage[5];
             }
+            if (!Objects.equals(informationMessage[6], informationMessageSentLastTime[6])) {
 
-            if(!Objects.equals(informationMessage[6], informationMessageSentLastTime[6])) {
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        controlBle.sendDirectionPrecise(informationMessage[6]);
-                    }
-                }, 100);
+                controlBle.sendDirectionPrecise(informationMessage[6]);
+
                 informationMessageSentLastTime[6] = informationMessage[6];
             }
-                Log.d("d","done");
-                informationMessageSentLastTime = informationMessage;
-                ifSendNotification = false;//reduce the frequency of sending messages
-                //why not just check if two messages are the same,  why still need to send same message every half second:
-                //because if the device lost connection before, we have to keep send message to it to keep it does not
-                //receive any wrong message.
-            }
+            Log.d("d", "done");
+            informationMessageSentLastTime = informationMessage;
+            ifSendNotification = false;//reduce the frequency of sending messages
+            //why not just check if two messages are the same,  why still need to send same message every half second:
+            //because if the device lost connection before, we have to keep send message to it to keep it does not
+            //receive any wrong message.
+        }
 
     }
 
 
+    private void init() {
+        Arrays.fill(informationMessageSentLastTime, "");
 
-    private void init(){
         initService();
         initBroadcastReceiver();
         setSendNotificationTimer();
@@ -212,14 +186,14 @@ public class NotificationService extends NotificationListenerService {
         DirectionUtils.loadSamplesFromAsserts(getApplicationContext());
     }
 
-    private void initService(){
+    private void initService() {
         serviceConnToBle = new ServiceConnToBle();
         Intent intent = new Intent(this, BleService.class);
         bindService(intent, serviceConnToBle, BIND_AUTO_CREATE);
         startService(intent);//bind the service
     }
 
-    private void initBroadcastReceiver(){
+    private void initBroadcastReceiver() {
         LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
         ReceiverForDeviceStatus receiverForDeviceStatus = new ReceiverForDeviceStatus();
         IntentFilter intentFilterForDeviceStatus = new IntentFilter(getFILTER_DEVICE_STATUS());
@@ -228,23 +202,24 @@ public class NotificationService extends NotificationListenerService {
 
     private class ServiceConnToBle implements ServiceConnection {
         @Override
-        public void onServiceConnected(ComponentName name, IBinder iBinder){
-            controlBle = (BleService.BleBinder)iBinder;
+        public void onServiceConnected(ComponentName name, IBinder iBinder) {
+            controlBle = (BleService.BleBinder) iBinder;
         }
+
         @Override
-        public void onServiceDisconnected(ComponentName name){
+        public void onServiceDisconnected(ComponentName name) {
         }
     }
 
-    private class ReceiverForDeviceStatus extends BroadcastReceiver{
+    private class ReceiverForDeviceStatus extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             deviceStatus = intent.getBooleanExtra(getFILTER_DEVICE_STATUS(), false);
         }
     }
 
-    public void setSendNotificationTimer(){
-        if(timerSendNotification == null){
+    public void setSendNotificationTimer() {
+        if (timerSendNotification == null) {
             timerSendNotification = new Timer();
             TimerTask timerTask = new TimerTask() {
                 @Override

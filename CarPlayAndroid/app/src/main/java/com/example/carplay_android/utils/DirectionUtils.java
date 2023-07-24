@@ -58,11 +58,20 @@ public class DirectionUtils {
     public static String getDirectionByComparing(@NotNull Bitmap bitmapBeCompared) {
         int result = -1;
         int index = -1;
-        for (int i = 0; i < bitmaps.size(); i++) {
+        int closest = 999;//
+        int closestIndex = -1;
+        for (int i = 0; i < bitmaps.size(); i++) {// compare each
+
             Bitmap bitmapComparedWith;
             bitmapBeCompared = Bitmap.createScaledBitmap(bitmapBeCompared, 120, 120, false);
             bitmapComparedWith = Bitmap.createScaledBitmap(bitmaps.get(i).getSampleBitmap(), 120, 120, false);
             float resultTemp = compareBitmaps(bitmapComparedWith, bitmapBeCompared);
+
+            if((int)result < closest){
+                closest = (int)result;
+                closestIndex = i;
+            }
+
             if (result == -1 || ((Float.compare(resultTemp, ((float) result)) < 0))) {
                 result = (int) resultTemp;
                 index = i;
@@ -72,6 +81,7 @@ public class DirectionUtils {
             if (result <= 35) {
                 return bitmaps.get(index).getBitmapName();
             }
+            return bitmaps.get(closestIndex).getBitmapName();
         }
         return "UNKNOWN";
     }
