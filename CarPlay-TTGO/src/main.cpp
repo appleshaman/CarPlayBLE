@@ -17,7 +17,7 @@
 #define DISTANCE_UUID "8bf31540-eb0d-476c-b233-f514678d2afb"
 #define DIRECTION_PRECISE_UUID "a602346d-c2bb-4782-8ea7-196a11f85113"
 
-Information destination("destination");
+Information destination("destinationdestinationdestination");
 Information ETA("00:00");
 Information direction("directionsdirections");
 Information directionDistance("N/A");
@@ -80,6 +80,11 @@ class MyCallback : public BLECharacteristicCallbacks
     }
 };
 
+int scroll_position = 0;
+bool scroll_right = true;
+unsigned long previousMillis = 0;
+const long interval = 150;
+const int charsToDisplay = 14;
 void setup()
 {
     Serial.begin(921600);
@@ -107,8 +112,6 @@ void loop()
     {
         debounce = true; // debounce
     }
-
-    // delay(2000);
 
     if ((pServer->getConnectedCount() == 0) && (ifConnected))
     { // confirm if has been connected
@@ -173,16 +176,41 @@ void loop()
             drawDirectionImage(directionPrecise.getString());
         }
         if (directionDistance.getBoolean())
-        {   
+        {
+            directionPrecise.setBoolean(false);
             tft.setTextPadding(70);
-            tft.drawString(directionDistance.getString(), 175, 90, 4);
+            tft.drawString(directionDistance.getString(), 183, 90, 4);
         }
-        if (destination.getBoolean())
-        {   Serial.println(destination.getString());
-            destination.setBoolean(false);
-            tft.setTextPadding(150);
-            tft.drawString(destination.getString(), 5, 90, 4);
-            tft.setTextPadding(10);
+        if (destination.getBoolean() && millis() - previousMillis >= interval)
+        {
+            previousMillis = millis();
+
+            // destination.setBoolean(false);
+
+            String displayString = destination.getString();
+            int max_scroll = displayString.length() - charsToDisplay;
+
+            if (scroll_right && scroll_position >= max_scroll)
+            {
+                scroll_right = false;
+            }
+            else if (!scroll_right && scroll_position <= 0)
+            {
+                scroll_right = true;
+            }
+
+            String toDraw = displayString.substring(scroll_position, scroll_position + charsToDisplay);
+            tft.setTextPadding(tft.textWidth(toDraw, 4) + 8);
+            tft.drawString(toDraw, 0, 90, 4);
+
+            if (scroll_right)
+            {
+                scroll_position += 1;
+            }
+            else
+            {
+                scroll_position -= 1;
+            }
         }
         if (direction.getBoolean())
         {
