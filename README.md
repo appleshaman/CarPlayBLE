@@ -27,7 +27,5 @@ Here is the explaination to each line of the information displayed.<br>
 
 ### remember you can click the left button to switch the orientation of the screen
 ## Bugs or disadvantages already known
-The ble messege sent between two parts are not effiecient as the MTU settings are inefficient, the messege sent each time are limited in 20 bytes so I have send it for multiple times.
-The part about read the ble message for ESP32 is also hard to use, this is due to I could not do a deep copy to the data I received.
-Both of them are caused by the Andrino frame that is not 100% compatiable with ESP32, I would use ESPidf to rebuild this in the future
+
 The app could not store the device that connected before, so you have to scan it every time, this is due to I have not found a good way to store the device yet, even the BluetoothDevice class had implemented Parcelable but still could not be transfered into bytes and store it, I will find a way in the future to fix it.
