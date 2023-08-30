@@ -98,11 +98,9 @@ public class NotificationService extends NotificationListenerService {
         if (strings.length == 2) {
             informationMessage[2] = strings[1].trim();//Distance to next direction
             informationMessage[3] = strings[0].trim();//Direction to somewhere
-
         } else if (strings.length == 1) {
             informationMessage[2] = strings[0].trim();//Direction to somewhere
             informationMessage[3] = "N/A";//Distance to next direction
-
         }
 
         string = bundle.getString(Notification.EXTRA_SUB_TEXT);
@@ -115,20 +113,11 @@ public class NotificationService extends NotificationListenerService {
 
         if (deviceStatus) {
             if (!informationMessage[0].equals(informationMessageSentLastTime[0])) {//destination
-
-//                if (informationMessage[0].length() > 8) {
-//                    controlBle.sendDestination(informationMessage[0].substring(0, 8) + "..");//use 8 not 9 is to save one more letter for ".."
-//                } else {
-                    controlBle.sendDestination(informationMessage[0]);
-                //}
+                controlBle.sendDestination(informationMessage[0]);
                 informationMessageSentLastTime[0] = informationMessage[0];
             }
             if (!Objects.equals(informationMessage[1], informationMessageSentLastTime[1])) {//ETA
-
-
                 controlBle.sendEta(informationMessage[1]);
-
-
                 informationMessageSentLastTime[1] = informationMessage[1];
             }
             if (!Objects.equals(informationMessage[2], informationMessageSentLastTime[2])) {//direction
