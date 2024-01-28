@@ -16,4 +16,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "CarPlay-Android"
 include ':app'
-include ':theMapReader'
+

@@ -197,6 +197,7 @@ public class NotificationService extends NotificationListenerService {
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
+            bindService(new Intent(NotificationService.this, BleService.class), serviceConnToBle, BIND_AUTO_CREATE);
         }
     }
 
@@ -223,6 +224,11 @@ public class NotificationService extends NotificationListenerService {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        if (timerSendNotification != null) {
+            timerSendNotification.cancel();
+            timerSendNotification = null;
+        }
+        Log.d("NotificationService", "onDestroy");
         BroadcastUtils.sendStatus(false, getFILTER_NOTIFICATION_STATUS(), getApplicationContext());
         unbindService(serviceConnToBle);
     }
